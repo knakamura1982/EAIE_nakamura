@@ -124,6 +124,8 @@ python LunarLander_v2.py --games 10 --max_steps 200 --randmode
 これは OpenAI Gym のタスクではなく，Q学習によるAI実装のデモ用に本リポジトリの作者が自作したミニゲームです．  
 人間がキーボード操作でプレイすることも一応可能です．
 
+## QTable_checker.py
+
 ## qtable.py
 
 上述の各プログラムで使用するQテーブルを実装したファイル．
