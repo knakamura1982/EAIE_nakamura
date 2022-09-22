@@ -1,4 +1,4 @@
-### 全体を通して
+## 全体を通して
 
 主にOpenAI Gymの制御系タスクを題材としてQ学習を試みるプログラム群です．  
 これらのタスクは，本来，deep neural network でQ学習を実現する Deep Q Network (DQN) で解くことを想定されていますが，  
@@ -8,7 +8,7 @@
 下記のサイトに各タスクの情報が簡単にまとめられていますので，併せてご参照ください．  
 https://github.com/openai/gym/wiki/Leaderboard
 
-### CartPole_v0.py
+## CartPole_v0.py
 
 OpenAI Gym の Classic Control タスクの一つ CartPole-v0 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどを参照．  
@@ -50,7 +50,7 @@ python CartPole_v0.py --games 10 --max_steps 200 --randmode
   - このモードで動作しているときはQテーブルは更新されない
   - testmode より優先される（両方指定した場合はランダム戦略になる）
 
-### MountainCar_v0.py
+## MountainCar_v0.py
 
 OpenAI Gym の Classic Control タスクの一つ MountainCar-v0 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどを参照．  
@@ -73,7 +73,7 @@ python MountainCar_v0.py --games 10 --max_steps 200 --randmode
 **オプション**
 - いずれも CartPole_v0.py の同名オプションと全く同じ
 
-### Acrobot_v1.py
+## Acrobot_v1.py
 
 OpenAI Gym の Classic Control タスクの一つ Acrobot-v1 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどを参照．  
@@ -96,7 +96,7 @@ python Acrobot_v1.py --games 10 --max_steps 200 --randmode
 **オプション**
 - いずれも CartPole_v0.py の同名オプションと全く同じ
 
-### LunarLander_v2.py
+## LunarLander_v2.py
 
 OpenAI Gym の Box2D タスクの一つ LunarLander-v2 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどを参照．  
@@ -119,11 +119,11 @@ python LunarLander_v2.py --games 10 --max_steps 200 --randmode
 **オプション**
 - いずれも CartPole_v0.py の同名オプションと全く同じ
 
-### myGame.py
+## myGame.py
 
 これは OpenAI Gym のタスクではなく，Q学習によるAI実装のデモ用に本リポジトリの作者が自作したミニゲームです．  
 人間がキーボード操作でプレイすることも一応可能です．
 
-### qtable.py
+## qtable.py
 
 上述の各プログラムで使用するQテーブルを実装したファイル．
