@@ -1,5 +1,6 @@
 ## はじめに
-本リポジトリは，応用情報工学演習（Exercises in Applied Information Engineering; EAIE）の中村研究室担当分の演習で使用するデータ・コード一式をアップロードしたものです．
+本リポジトリは，応用情報工学演習（Exercises in Applied Information Engineering; EAIE）の  
+中村研究室担当分の演習で使用するデータ・コード一式をアップロードしたものです．
 
 ## 想定環境
 - 言語: Python 3.x（動作確認は Anaconda + Python 3.9 で行いました）
