@@ -10,13 +10,13 @@ https://github.com/openai/gym/wiki/Leaderboard
 
 ### CartPole_v0.py
 
-OpenAI Gym の Classic Control タスクの一つ CartPole-v0 を通常のQ学習で解くプログラム（のひな型）．
+OpenAI Gym の Classic Control タスクの一つ CartPole-v0 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどを参照．  
 https://github.com/openai/gym/wiki/CartPole-v0
 
 ### MountainCar_v0.py
 
-OpenAI Gym の Classic Control タスクの一つ MountainCar-v0 を通常のQ学習で解くプログラム（のひな型）．
+OpenAI Gym の Classic Control タスクの一つ MountainCar-v0 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどを参照．  
 https://github.com/openai/gym/wiki/MountainCar-v0
 
