@@ -88,6 +88,21 @@ python CNN_train.py --gpu 0 --epochs 10 --batchsize 100 --model CNN_model.pth --
 
 ### CNN_test.py
 
+**コマンド**
+```
+python CNN_test.py --gpu 0 --batchsize 100 --model CNN_model.pth
+```
+**オプション**
+- gpu
+  - 使用するGPUのID
+  - デフォルト値も含めて MLP_train.py の同名オプションと同じ
+- batchsize
+  - バッチサイズ（テスト時でもデータ数が多い場合にはミニバッチ分割しないと out of memory になる）
+  - デフォルト値も含めて MLP_train.py の同名オプションと同じ
+- model
+  - ロードするモデルパラメータファイル
+  - このオプションを指定しない場合，デフォルトとして ./CNN_models/model.pth が読み込まれる
+
 ### CNN_models
 
 CNN_train.py による学習結果の保存先として使用する想定のフォルダ．  
