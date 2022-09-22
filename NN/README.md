@@ -38,3 +38,20 @@ python MLP_test.py --gpu 0 --batchsize 100 --model MLP_model.pth
 - model
   - ロードするモデルパラメータファイル
   - このオプションを指定しない場合，デフォルトとして ./MLP_models/model.pth が読み込まれる
+
+### networks.py
+
+他のファイルで使用するニューラルネットワークのネットワーク構造が記載されている
+
+### csv_data
+
+サンプルデータセット（CSVファイル）が保存されているフォルダ
+
+### MLP_models
+
+MLP_train.py による学習結果の保存先として使用する想定のフォルダ
+
+動作テスト時に作成したファイルが model.pth という名前で残っているが，決して良いモデルではない
+
+
+
