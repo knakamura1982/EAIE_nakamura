@@ -30,6 +30,17 @@
 
 ## QTable_checker.py
 
+## BJNet_models
+
+NN_train.py による学習結果の保存先として使用する想定のフォルダ．
+動作テスト時に作成したファイルが model.pth という名前で残っているが，決して良いモデルではない
+
+## imgs
+
+トランプカードの図柄画像が収められています（human_player.py でのみ使用）．  
+なお，素材は下記サイトからお借りしました．  
+https://chicodeza.com/freeitems/torannpu-illust.html
+
 ## その他
 
 以下のソースファイルは実行対象ではありません．
