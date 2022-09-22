@@ -65,6 +65,27 @@ tar -xzvf MNIST.tar.gz
 
 ### CNN_train.py
 
+**コマンド**
+```
+python CNN_train.py --gpu 0 --epochs 10 --batchsize 100 --model CNN_model.pth --autosave
+```
+**オプション**
+- gpu
+  - 使用するGPUのID
+  - デフォルト値も含めて MLP_train.py の同名オプションと同じ
+- epochs
+  - 何エポック分学習するか
+  - MLP_train.py の同名オプションと同じだが，指定しない場合のデフォルト値は 10
+- batchsize
+  - バッチサイズ
+  - デフォルト値も含めて MLP_train.py の同名オプションと同じ
+- model
+  - 学習結果のモデルパラメータの保存先
+  - このオプションを指定しない場合，デフォルト値として ./CNN_models/model.pth がセットされる
+- autosave
+  - 指定すると毎エポック終了時にモデルパラメータが自動保存される
+  - 保存先は ./CNN_models/autosaved_model_epX.pth となる（ X はエポック番号 ）
+
 ### CNN_test.py
 
 ### CNN_models
