@@ -1,9 +1,7 @@
 ### MLP_train.py
 
 - 実行コマンド
-'''
-python MLP_train.py --gpu 0 --epochs 50 --batchsize 100 --model MLP_model.pth --autosave
-'''
+```python MLP_train.py --gpu 0 --epochs 50 --batchsize 100 --model MLP_model.pth --autosave```
 - オプション
   - gpu
     - 使用するGPUのID (-1を指定するとCPU上で動作する)
