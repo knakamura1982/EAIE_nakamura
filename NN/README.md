@@ -1,10 +1,10 @@
 ### MLP_train.py
 
-#### 実行コマンド
+**コマンド**
 ```
 python MLP_train.py --gpu 0 --epochs 50 --batchsize 100 --model MLP_model.pth --autosave
 ```
-#### オプション
+**オプション**
 - gpu
   - 使用するGPUのID (-1を指定するとCPU上で動作する)
   - このオプションを指定しない場合，デフォルト値として -1 がセットされる
