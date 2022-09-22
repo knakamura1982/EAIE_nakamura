@@ -49,8 +49,7 @@ python MLP_test.py --gpu 0 --batchsize 100 --model MLP_model.pth
 
 ### MLP_models
 
-MLP_train.py による学習結果の保存先として使用する想定のフォルダ
-
+MLP_train.py による学習結果の保存先として使用する想定のフォルダ  
 動作テスト時に作成したファイルが model.pth という名前で残っているが，決して良いモデルではない
 
 
