@@ -127,10 +127,11 @@ for game_ID in range(1, N_GAMES):
         total_reward += reward
 
         # Qテーブルを更新
-        _, V = q_table.get_best_action(state, with_value=True)
-        Q = q_table.get_Q_value(prev_state, action) # 現在のQ値
-        Q = (1 - LEARNING_RATE) * Q + LEARNING_RATE * (reward + DISCOUNT_FACTOR * V) # 新しいQ値
-        q_table.set_Q_value(prev_state, action, Q) # 新しいQ値を登録
+        if not (args.testmode or args.randmode):
+            _, V = q_table.get_best_action(state, with_value=True)
+            Q = q_table.get_Q_value(prev_state, action) # 現在のQ値
+            Q = (1 - LEARNING_RATE) * Q + LEARNING_RATE * (reward + DISCOUNT_FACTOR * V) # 新しいQ値
+            q_table.set_Q_value(prev_state, action, Q) # 新しいQ値を登録
 
         # MAX_STEPS分が完了する前にゲームが終了した場合は，すぐに次のゲームに移行
         if done:
