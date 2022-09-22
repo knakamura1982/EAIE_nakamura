@@ -4,13 +4,13 @@
 ## 想定環境
 - 言語: Python 3.x（動作確認は Anaconda + Python 3.9 で行いました）
 - モジュール:
--- numpy
--- pandas
--- matplotlib
--- opencv (4.6)
--- pytorch + torchvision
--- tqdm
--- openai gym
+  - numpy
+  - pandas
+  - matplotlib
+  - opencv (4.6)
+  - pytorch + torchvision
+  - tqdm
+  - openai gym
 
 ## コンテンツ
 ### mylib
