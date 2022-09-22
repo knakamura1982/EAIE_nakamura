@@ -56,14 +56,74 @@ OpenAI Gym の Classic Control タスクの一つ MountainCar-v0 を通常のQ�
 タスクの内容については下記サイトなどを参照．  
 https://github.com/openai/gym/wiki/MountainCar-v0
 
+**コマンド**
+```
+# 一から学習する場合
+python MountainCar_v0.py --games 10 --max_steps 200 --save result_QTable.pkl
+
+# 学習済みQテーブルをロードし，そこから学習を再開する場合
+python MountainCar_v0.py --games 10 --max_steps 200 --load initial_QTable.pkl --save result_QTable.pkl
+
+# 学習済みQテーブルをロードして単にタスクを実行するだけの場合
+python MountainCar_v0.py --games 10 --max_steps 200 --load initial_QTable.pkl --testmode
+
+# Qテーブルを用いずにランダム戦略でタスクを実行する場合
+python MountainCar_v0.py --games 10 --max_steps 200 --randmode
+```
+**オプション**
+- いずれも CartPole_v0.py の同名オプションと全く同じ
+
 ### Acrobot_v1.py
 
 OpenAI Gym の Classic Control タスクの一つ Acrobot-v1 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどを参照．  
 https://www.tcom242242.net/entry/ai-2/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92/acrobot/
 
+**コマンド**
+```
+# 一から学習する場合
+python Acrobot_v1.py --games 10 --max_steps 200 --save result_QTable.pkl
+
+# 学習済みQテーブルをロードし，そこから学習を再開する場合
+python Acrobot_v1.py --games 10 --max_steps 200 --load initial_QTable.pkl --save result_QTable.pkl
+
+# 学習済みQテーブルをロードして単にタスクを実行するだけの場合
+python Acrobot_v1.py --games 10 --max_steps 200 --load initial_QTable.pkl --testmode
+
+# Qテーブルを用いずにランダム戦略でタスクを実行する場合
+python Acrobot_v1.py --games 10 --max_steps 200 --randmode
+```
+**オプション**
+- いずれも CartPole_v0.py の同名オプションと全く同じ
+
 ### LunarLander_v2.py
 
 OpenAI Gym の Box2D タスクの一つ LunarLander-v2 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどを参照．  
 https://shiva-verma.medium.com/solving-lunar-lander-openaigym-reinforcement-learning-785675066197
+
+**コマンド**
+```
+# 一から学習する場合
+python LunarLander_v2.py --games 10 --max_steps 200 --save result_QTable.pkl
+
+# 学習済みQテーブルをロードし，そこから学習を再開する場合
+python LunarLander_v2.py --games 10 --max_steps 200 --load initial_QTable.pkl --save result_QTable.pkl
+
+# 学習済みQテーブルをロードして単にタスクを実行するだけの場合
+python LunarLander_v2.py --games 10 --max_steps 200 --load initial_QTable.pkl --testmode
+
+# Qテーブルを用いずにランダム戦略でタスクを実行する場合
+python LunarLander_v2.py --games 10 --max_steps 200 --randmode
+```
+**オプション**
+- いずれも CartPole_v0.py の同名オプションと全く同じ
+
+### myGame.py
+
+これは OpenAI Gym のタスクではなく，Q学習によるAI実装のデモ用に本リポジトリの作者が自作したミニゲームです．  
+人間がキーボード操作でプレイすることも一応可能です．
+
+### qtable.py
+
+上述の各プログラムで使用するQテーブルを実装したファイル．
