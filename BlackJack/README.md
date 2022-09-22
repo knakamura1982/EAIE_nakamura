@@ -1,8 +1,8 @@
 ## 基本的な設計思想
 - ディーラープログラムとプレイヤープログラムが分かれており，ソケット通信をしながらゲームを進めます．
 - 様々な戦略のプレイヤーが同一のディーラーを相手に戦っている，ような雰囲気を出すための設計です．
-- ディーラーにしか把握できない情報はディーラープログラム側（dealer.py）に記載されていますので，  
-config.py や classes.py に記載の情報はプレイヤープログラム側から参照してOKです．
+- ディーラーにしか把握できない（はずの）情報は全てディーラープログラム側（dealer.py）に記載されています．
+  - ですので，config.py や classes.py に記載の情報はプレイヤープログラム側から参照してOKです．
   - 逆に dealer.py に記載の情報はプレイヤープログラム側からは参照しない，というルールです．
 - ディーラープログラムを相手に人間がプレイすることも可能です．
 
@@ -13,12 +13,18 @@ config.py や classes.py に記載の情報はプレイヤープログラム側�
 - プレイヤープログラムが終了しても，dealer.py は終了せず接続待ち状態に入りますので，以降はプレイヤープログラムを実行するだけでOKです．
 - dealer.py を終了したい場合は Ctrl+C で止めて下さい．
 
-## 各プログラムの説明
-- **dealer.py**
-- **human_player.py**
-- **ai_player_rand.py**
-- **ai_player_NN.py**
-- **ai_player_Q.py**
-- **log_selector.py**
-- **NN_train.py**
-- **QTable_checker.py**
+## dealer.py
+
+## human_player.py
+
+## ai_player_rand.py
+
+## ai_player_NN.py
+
+## ai_player_Q.py
+
+## log_selector.py
+
+## NN_train.py
+
+## QTable_checker.py
