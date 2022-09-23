@@ -11,7 +11,7 @@ https://github.com/openai/gym/wiki/Leaderboard
 ## CartPole_v0.py
 
 OpenAI Gym の Classic Control タスクの一つ CartPole-v0 を通常のQ学習で解くプログラム（のひな型）．  
-タスクの内容については下記サイトなどを参照．  
+タスクの内容については下記サイトなどをご参照ください．  
 https://github.com/openai/gym/wiki/CartPole-v0
 
 **コマンド**
@@ -31,29 +31,29 @@ python CartPole_v0.py --games 10 --max_steps 200 --randmode
 **オプション**
 - games
   - 連続して何ゲームプレイするか
-  - 指定しない場合，デフォルト値として 1 がセットされる
+  - 指定しない場合，デフォルト値として 1 がセットされます．
 - max_steps
   - 1ゲームあたりの最大ステップ数
-  - ステップ数がこのオプションで指定した値を超えると，終了条件を満たしていなくても現在のゲームを打ち切り，次のゲームに移行する
-  - 指定しない場合，デフォルト値として 200 がセットされる
+  - ステップ数がこのオプションで指定した値を超えると，終了条件を満たしていなくても現在のゲームを打ち切り，次のゲームに移行します．
+  - 指定しない場合，デフォルト値として 200 がセットされます．
 - load
-  - 指定したファイルからQテーブルをロードする
-  - 必ずしも指定しなくても良い．指定しない場合，Qテーブルは全てのフィールドが 0 で初期化される
+  - 指定したファイルからQテーブルをロードします．
+  - 必ずしも指定しなくても良い．指定しない場合，Qテーブルは全てのフィールドが 0 で初期化されます．
 - save
-  - 指定したファイルに学習結果のQテーブルが保存される（既に存在するファイル名を指定した場合は上書きされる）
-  - 必ずしも指定しなくても良い．指定しない場合，学習結果は保存されない（プログラム終了時に破棄される）
+  - 指定したファイルに学習結果のQテーブルが保存されます（既に存在するファイル名を指定した場合は上書きされます）．
+  - 必ずしも指定する必要はありません．指定しない場合，学習結果は保存されません（プログラム終了時に破棄されます）．
 - testmode
-  - 指定すると，常にQ値最大の行動を選択するようになる（ε-greedy において ε=0 の状態になる）
-  - このモードで動作しているときはQテーブルは更新されない
+  - 指定すると，常にQ値最大の行動を選択するようになります（ε-greedy における ε=0 の状態）．
+  - このモードで動作しているときはQテーブルは更新されません．
 - randmode
-  - 指定すると，Qテーブルを用いずにランダム戦略でタスクを実行する
-  - このモードで動作しているときはQテーブルは更新されない
-  - testmode より優先される（両方指定した場合はランダム戦略になる）
+  - 指定すると，Qテーブルを用いずにランダム戦略でタスクを実行するようになります．
+  - このモードで動作しているときはQテーブルは更新されません．
+  - testmode より優先されます（両方指定した場合はランダム戦略になります）．
 
 ## MountainCar_v0.py
 
 OpenAI Gym の Classic Control タスクの一つ MountainCar-v0 を通常のQ学習で解くプログラム（のひな型）．  
-タスクの内容については下記サイトなどを参照．  
+タスクの内容については下記サイトなどをご参照ください．  
 https://github.com/openai/gym/wiki/MountainCar-v0
 
 **コマンド**
@@ -71,12 +71,12 @@ python MountainCar_v0.py --games 10 --max_steps 200 --load initial_QTable.pkl --
 python MountainCar_v0.py --games 10 --max_steps 200 --randmode
 ```
 **オプション**
-- いずれも CartPole_v0.py の同名オプションと全く同じ
+- いずれも CartPole_v0.py の同名オプションと全く同じです．
 
 ## Acrobot_v1.py
 
 OpenAI Gym の Classic Control タスクの一つ Acrobot-v1 を通常のQ学習で解くプログラム（のひな型）．  
-タスクの内容については下記サイトなどを参照．  
+タスクの内容については下記サイトなどをご参照ください．  
 https://www.tcom242242.net/entry/ai-2/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92/acrobot/
 
 **コマンド**
@@ -94,12 +94,12 @@ python Acrobot_v1.py --games 10 --max_steps 200 --load initial_QTable.pkl --test
 python Acrobot_v1.py --games 10 --max_steps 200 --randmode
 ```
 **オプション**
-- いずれも CartPole_v0.py の同名オプションと全く同じ
+- いずれも CartPole_v0.py の同名オプションと全く同じです．
 
 ## LunarLander_v2.py
 
 OpenAI Gym の Box2D タスクの一つ LunarLander-v2 を通常のQ学習で解くプログラム（のひな型）．  
-タスクの内容については下記サイトなどを参照．  
+タスクの内容については下記サイトなどをご参照ください．  
 https://shiva-verma.medium.com/solving-lunar-lander-openaigym-reinforcement-learning-785675066197
 
 **コマンド**
@@ -117,7 +117,7 @@ python LunarLander_v2.py --games 10 --max_steps 200 --load initial_QTable.pkl --
 python LunarLander_v2.py --games 10 --max_steps 200 --randmode
 ```
 **オプション**
-- いずれも CartPole_v0.py の同名オプションと全く同じ
+- いずれも CartPole_v0.py の同名オプションと全く同じです．
 
 ## myGame.py
 
@@ -158,14 +158,14 @@ python myGame.py --load initial_QTable.pkl --save result_QTable.pkl --history my
 ```
 **オプション**
 - load
-  - プログラム開始時，指定したファイルからQテーブルをロードする
-  - 必ずしも指定しなくても良い．指定しない場合，Qテーブルは全てのフィールドが 0 で初期化される
+  - プログラム開始時，指定したファイルからQテーブルをロードします．
+  - 必ずしも指定する必要はありません．指定しない場合，Qテーブルは全てのフィールドが 0 で初期化されます．
 - save
-  - 指定したファイルに学習結果のQテーブルが保存される（既に存在するファイル名を指定した場合は上書きされる）
-  - 必ずしも指定しなくても良い．指定しない場合，学習結果は保存されない（プログラム終了時に破棄される）
+  - 指定したファイルに学習結果のQテーブルが保存されます（既に存在するファイル名を指定した場合は上書きされます）．
+  - 必ずしも指定する必要はありません．指定しない場合，学習結果は保存されません（プログラム終了時に破棄されます）．
 - history
-  - 指定したファイルに毎ゲーム終了時点での得点が記録される（既に存在するファイル名を指定した場合は上書きされる）
-  - 必ずしも指定しなくても良い．指定しない場合，得点は記録されない
+  - 指定したファイルに毎ゲーム終了時点での得点が記録されます（既に存在するファイル名を指定した場合は上書きされます）．
+  - 必ずしも指定する必要はありません．指定しない場合，得点は記録されません．
 
 ## QTable_checker.py
 
@@ -175,13 +175,13 @@ python myGame.py --load initial_QTable.pkl --save result_QTable.pkl --history my
 ```
 python QTable_checker.py --file QTable.pkl
 
-# 以下のようにして csv ファイルに書き出してから Excel で確認した方が分かりやすいかもしれない
+# 以下のようにして csv ファイルに書き出してから Excel で確認した方が分かりやすいかも
 python QTable_checker.py --file QTable.pkl > QTable.csv
 ```
 
 **オプション**
 - file
-  - 上述の各種プログラムで保存したQテーブルファイル
+  - 上述の各種プログラムで保存したQテーブルファイル．
 
 ## qtable.py
 
