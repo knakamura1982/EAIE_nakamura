@@ -8,6 +8,9 @@
 
 ## MLP_train.py
 
+CSVの学習データセットを読み込んでニューラルネットワーク（多層パーセプトロン）を学習するプログラム．  
+読み込むデータセットは18行目で指定します．
+
 **コマンド**
 ```
 python MLP_train.py --gpu 0 --epochs 50 --batchsize 100 --model MLP_model.pth --autosave
@@ -31,6 +34,9 @@ python MLP_train.py --gpu 0 --epochs 50 --batchsize 100 --model MLP_model.pth --
   - 保存先は ./MLP_models/autosaved_model_epX.pth です（ X はエポック番号 ）．
 
 ## MLP_test.py
+
+上記の MLP_train.py で学習したニューラルネットワークのテストを行うプログラム．  
+使用するテストデータセットは15行目で指定します．
 
 **コマンド**
 ```
@@ -65,6 +71,9 @@ tar -xzvf MNIST.tar.gz
 
 ## CNN_train.py
 
+画像データセットを読み込んで畳込みニューラルネットワークを学習するプログラム．  
+読み込むデータセットは17行目で指定します．
+
 **コマンド**
 ```
 python CNN_train.py --gpu 0 --epochs 10 --batchsize 100 --model CNN_model.pth --autosave
@@ -87,6 +96,9 @@ python CNN_train.py --gpu 0 --epochs 10 --batchsize 100 --model CNN_model.pth --
   - 保存先は ./CNN_models/autosaved_model_epX.pth です（ X はエポック番号 ）．
 
 ## CNN_test.py
+
+上記の CNN_train.py で学習したニューラルネットワークのテストを行うプログラム．  
+使用するテストデータセットは15行目で指定します．
 
 **コマンド**
 ```
