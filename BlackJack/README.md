@@ -65,6 +65,30 @@ python ai_player_rand.py --games 10 --history play_log.csv
 
 ## ai_player_NN.py
 
+ニューラルネットワークに基づいて行動を選択するAIプレイヤーのプログラム．  
+
+**コマンド**
+```
+python ai_player_NN.py --games 10 --history play_log.csv --gpu 0 --model BJNet_model.pth
+```
+
+**オプション**
+- games
+  - 連続して何回ゲームをプレイするか
+  - 指定しなかった場合，デフォルト値として 1 がセットされます（つまり1回だけプレイして終了）．
+- history
+  - AIプレイヤーが選択した行動をログとして記録する際の記録先ファイル．
+    - 198～212行目の get_state 関数を改造し，さらに245行目と282行目を適切に修正すれば，  
+    様々な情報を記録できるようになります．
+  - 指定しなかった場合，デフォルト値として play_log.csv がセットされます．
+- gpu
+  - 使用するGPUのID (-1を指定するとCPU上で動作します)
+  - このオプションを指定しない場合，デフォルト値として -1 がセットされます．
+  - cudaを使用できない環境では無視されます．
+- model
+  - 使用するニューラルネットワークのモデルパラメータファイル
+  - このオプションを指定しない場合，デフォルト値として ./BJNet_models/model.pth が読み込まれます．
+
 ## ai_player_Q.py
 
 ## log_selector.py
@@ -122,7 +146,7 @@ python NN_train.py --gpu 0 --epochs 50 --batchsize 100 --model BJNet_model.pth -
 ## BJNet_models
 
 NN_train.py による学習結果の保存先として使用する想定のフォルダ．  
-動作テスト時に作成したファイルが model.pth という名前で残っているが，決して良いモデルではありません．
+動作テスト時に作成したファイルが model.pth という名前で残っていますが，決して良いモデルではありません．
 
 ## imgs
 
