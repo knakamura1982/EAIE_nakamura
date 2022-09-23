@@ -185,4 +185,4 @@ python QTable_checker.py --file QTable.pkl > QTable.csv
 
 ## qtable.py
 
-上述の各プログラムで使用するQテーブルを実装したファイル．
+Qテーブルの細かい処理を実装したファイル．
