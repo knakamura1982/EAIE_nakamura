@@ -11,6 +11,11 @@
 CSVの学習データセットを読み込んでニューラルネットワーク（多層パーセプトロン）を学習するプログラム．  
 読み込むデータセットは18行目で指定します．
 
+25行目の VISUALIZE = True は学習プロセスを可視化するための設定で，  
+データセットとして weather_train.csv を使用することを前提としています．  
+可視化が不要な場合や，データセットを weather_train.csv から変更する場合は，  
+VISUALIZE = False としてください．
+
 **コマンド**
 ```
 python MLP_train.py --gpu 0 --epochs 50 --batchsize 100 --model MLP_model.pth --autosave
