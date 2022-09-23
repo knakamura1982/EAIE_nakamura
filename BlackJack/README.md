@@ -92,6 +92,39 @@ python ai_player_NN.py --games 10 --history play_log.csv --gpu 0 --model BJNet_m
 
 ## ai_player_Q.py
 
+Q学習を用いてリアルタイムに戦略（行動選択基準）を獲得するAIプレイヤーのプログラム．  
+
+**コマンド**
+```
+# 一から学習する場合
+python ai_player_Q.py --games 10 --history play_log.csv --save result_QTable.pkl
+
+# 学習済みQテーブルをロードし，そこから学習を再開する場合
+python ai_player_Q.py --games 10 --history play_log.csv --load initial_QTable.pkl --save result_QTable.pkl
+
+# 学習済みQテーブルをロードして単にゲームをプレイするだけの場合
+python ai_player_Q.py --games 10 --history play_log.csv --load initial_QTable.pkl --testmode
+```
+
+**オプション**
+- games
+  - 連続して何回ゲームをプレイするか
+  - 指定しなかった場合，デフォルト値として 1 がセットされます（つまり1回だけプレイして終了）．
+- history
+  - AIプレイヤーが選択した行動をログとして記録する際の記録先ファイル．
+    - 188～202行目の get_state 関数を改造し，さらに250行目と291行目を適切に修正すれば，  
+    様々な情報を記録できるようになります．
+  - 指定しなかった場合，デフォルト値として play_log.csv がセットされます．
+- load
+  - 指定したファイルからQテーブルをロードします．
+  - 必ずしも指定する必要はありません．指定しない場合，Qテーブルは全てのフィールドが 0 で初期化されます．
+- save
+  - 指定したファイルに学習結果のQテーブルが保存されます（既に存在するファイル名を指定した場合は上書きされます）．
+  - 必ずしも指定する必要はありません．指定しない場合，学習結果は保存されません（プログラム終了時に破棄されます）．
+- testmode
+  - 指定すると，常にQ値最大の行動を選択するようになります（ε-greedy における ε=0 の状態）．
+  - このモードで動作しているときはQテーブルは更新されません．
+
 ## log_selector.py
 
 プレイヤープログラム実行時に出力されたログファイルから「都合が良い」行のみを抽出するプログラム．  
