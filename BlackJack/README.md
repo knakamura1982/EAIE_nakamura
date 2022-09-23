@@ -144,6 +144,20 @@ python NN_train.py --gpu 0 --epochs 50 --batchsize 100 --model BJNet_model.pth -
 
 ## QTable_checker.py
 
+保存済みのQテーブル（ai_player_Q.py で学習したもの）の内容を出力するプログラム．
+
+**コマンド**
+```
+python QTable_checker.py --file QTable.pkl
+
+# 以下のようにして csv ファイルに書き出してから Excel で確認した方が分かりやすいかも
+python QTable_checker.py --file QTable.pkl > QTable.csv
+```
+
+**オプション**
+- file
+  - ai_player_Q.py の実行時に保存したQテーブルファイル．
+
 ## BJNet_models
 
 NN_train.py による学習結果の保存先として使用する想定のフォルダ．  
