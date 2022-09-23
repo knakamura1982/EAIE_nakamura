@@ -25,6 +25,7 @@ python dealer.py
 ```
 
 **オプション**
+
 特にありません．
 
 ## human_player.py
