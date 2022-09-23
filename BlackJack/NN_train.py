@@ -21,7 +21,7 @@ MODEL_DIR = './BJNet_models'
 
 
 # デバイス, エポック数, バッチサイズなどをコマンドライン引数から取得し変数に保存
-parser = argparse.ArgumentParser(description='Multi-Layer Perceptron Sample Code (training)')
+parser = argparse.ArgumentParser(description='Neural Network Trainer for AI Player')
 parser.add_argument('--gpu', '-g', default=-1, type=int, help='GPU/CUDA ID (negative value indicates CPU)')
 parser.add_argument('--epochs', '-e', default=50, type=int, help='number of epochs to learn')
 parser.add_argument('--batchsize', '-b', default=100, type=int, help='minibatch size')

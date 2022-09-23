@@ -380,8 +380,8 @@ class HumanPlayerWindow():
         state = self.state = self.get_state()
         score = state[0] # 行動後のプレイヤー手札のスコア（state の一つ目の要素）
 
-        # ログファイルに「現在の状態」「行動の種類」「行動結果」などの情報を記録
-        print('{},{},{},{},{}'.format(prev_score, action_name, score, status, reward), file=logfile)
+        # ログファイルに「行動前の状態」「行動の種類」「行動結果」「獲得金額」などの情報を記録
+        print('{},{},{},{},{}'.format(prev_state[0], prev_state[1], action_name, status, reward), file=logfile)
 
 
 ### ここから処理開始 ###
@@ -392,7 +392,7 @@ args = parser.parse_args()
 
 # ログファイルを開く
 logfile = open(args.history, 'w')
-print('pre_score,action,post_score,result,reward', file=logfile)
+print('score,hand_length,action,result,reward', file=logfile) # ログファイルにヘッダ行（項目名の行）を出力
 
 # メインループ開始
 window = HumanPlayerWindow(initial_money=INITIAL_MONEY, basic_bet=BET, max_cards_per_game=MAX_CARDS_PER_GAME)
