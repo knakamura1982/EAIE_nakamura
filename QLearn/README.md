@@ -169,6 +169,20 @@ python myGame.py --load initial_QTable.pkl --save result_QTable.pkl --history my
 
 ## QTable_checker.py
 
+保存済みのQテーブルの内容を出力するプログラム．
+
+**コマンド**
+```
+python QTable_checker.py --file QTable.pkl
+
+# 以下のようにして csv ファイルに書き出してから Excel で確認した方が分かりやすいかもしれない
+python QTable_checker.py --file QTable.pkl > QTable.csv
+```
+
+**オプション**
+- file
+  - 上述の各種プログラムで保存したQテーブルファイル
+
 ## qtable.py
 
 上述の各プログラムで使用するQテーブルを実装したファイル．
