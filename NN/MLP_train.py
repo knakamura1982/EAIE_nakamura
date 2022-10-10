@@ -2,6 +2,7 @@ import os
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 import sys
 sys.path.append(os.path.abspath('..'))
+import pickle
 import argparse
 import torch
 import torch.nn as nn
@@ -51,6 +52,8 @@ dataset = CSVBasedDataset(
         'label' # Yの型
     ]
 )
+with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'wb') as fdicts_file:
+    pickle.dump(dataset.forward_dicts, fdicts_file)
 
 # 訓練データセットを分割し，一方を検証用に回す
 dataset_size = len(dataset)

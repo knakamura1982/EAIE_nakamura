@@ -2,6 +2,7 @@ import os
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 import sys
 sys.path.append(os.path.abspath('..'))
+import pickle
 import argparse
 import torch
 from tqdm import tqdm
@@ -38,6 +39,8 @@ MODEL_PATH = args['model']
 
 
 # CSVファイルを読み込み, 訓練データセットを用意
+with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'rb') as fdicts_file:
+    fdicts = pickle.load(fdicts_file)
 test_dataset = CSVBasedDataset(
     filename = DATASET_CSV,
     items = [
@@ -48,7 +51,8 @@ test_dataset = CSVBasedDataset(
         'image', # Xの型
         'label' # Yの型
     ],
-    dirname = DATA_DIR
+    dirname = DATA_DIR,
+    fdicts = fdicts
 )
 test_size = len(test_dataset)
 

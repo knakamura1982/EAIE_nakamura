@@ -2,6 +2,7 @@ import os
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 import sys
 sys.path.append(os.path.abspath('..'))
+import pickle
 import argparse
 import torch
 import torch.nn as nn
@@ -55,6 +56,8 @@ dataset = CSVBasedDataset(
     ],
     dirname = DATA_DIR
 )
+with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'wb') as fdicts_file:
+    pickle.dump(dataset.forward_dicts, fdicts_file)
 
 # 認識対象のクラス数を取得
 n_classes = len(dataset.forward_dicts[1])
