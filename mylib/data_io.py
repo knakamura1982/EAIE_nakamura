@@ -15,17 +15,20 @@ def __to_one_hot__(i, n):
     return a
 
 # カテゴリカルデータのリストを整数値（np.int32）のリストに変換する関数
-def __to_numerical__(cat_data, one_hot=False):
+def __to_numerical__(cat_data, one_hot=False, fdict=None):
 
     # まず, データ値の種類数を求めておく
     s = sorted(set(cat_data))
     n = len(s)
 
     # 次に，正引き／逆引き辞書を作る
-    if one_hot:
-        forward_dict = {item:__to_one_hot__(i, n) for i, item in enumerate(s)}
+    if fdict is None:
+        if one_hot:
+            forward_dict = {item:__to_one_hot__(i, n) for i, item in enumerate(s)}
+        else:
+            forward_dict = {item:i for i, item in enumerate(s)}
     else:
-        forward_dict = {item:i for i, item in enumerate(s)}
+        forward_dict = fdict
     reverse_dict = [s[i] for i in range(n)]
 
     # 変換
@@ -38,12 +41,13 @@ def __to_numerical__(cat_data, one_hot=False):
 #   - filename: 読み込む csv ファイルのファイルパス
 #   - items: データとして読み込む列の項目名
 #   - dtypes: データの型（ 'float', 'label', 'one-hot', 'image' のいずれか）
+#   - fdicts: カテゴリデータを整数値に変換するための正引き辞書（Noneの場合は自動作成）
 #   - dirname: データ型が 'image' のとき, ファイル名の先頭に付加するディレクトリ名を指定するのに使用
 #   - img_mode: データ型が 'image' のとき, カラー画像か否かを指定するのに使用（ 'color' か 'grayscale' のいずれか）
 class CSVBasedDataset(Dataset):
 
     # コンストラクタ
-    def __init__(self, filename, items, dtypes, dirname='./', img_mode=''):
+    def __init__(self, filename, items, dtypes, fdicts=None, dirname='./', img_mode=''):
         super(CSVBasedDataset, self).__init__()
 
         self.dtypes = dtypes
@@ -70,22 +74,46 @@ class CSVBasedDataset(Dataset):
             elif dtypes[i] == 'label':
                 if type(items[i]) is list:
                     X = []
+                    fd = []
+                    rd = []
+                    j = 0
                     for item in items[i]:
-                        X_temp, _, _ = __to_numerical__(df[item].to_list(), one_hot=False)
+                        if fdicts is None:
+                            X_temp, fd_temp, rd_temp = __to_numerical__(df[item].to_list(), one_hot=False)
+                        else:
+                            X_temp, fd_temp, rd_temp = __to_numerical__(df[item].to_list(), one_hot=False, fdict=fdicts[i][j])
                         X.append(X_temp)
+                        fd.append(fd_temp)
+                        rd.append(rd_temp)
+                        j += 1
                     X = np.concatenate(X, axis=1)
                 else:
-                    X, fd, rd = __to_numerical__(df[items[i]].to_list(), one_hot=False)
+                    if fdicts is None:
+                        X, fd, rd = __to_numerical__(df[items[i]].to_list(), one_hot=False)
+                    else:
+                        X, fd, rd = __to_numerical__(df[items[i]].to_list(), one_hot=False, fdict=fdicts[i])
                 X = torch.tensor(X, dtype=torch.long, device='cpu')
             elif dtypes[i] == 'one-hot':
                 if type(items[i]) is list:
                     X = []
+                    fd = []
+                    rd = []
+                    j = 0
                     for item in items[i]:
-                        X_temp, _, _ = __to_numerical__(df[item].to_list(), one_hot=True)
+                        if fdicts is None:
+                            X_temp, fd_temp, rd_temp = __to_numerical__(df[item].to_list(), one_hot=True)
+                        else:
+                            X_temp, fd_temp, rd_temp = __to_numerical__(df[item].to_list(), one_hot=True, fdict=fdicts[i][j])
                         X.append(X_temp)
+                        fd.append(fd_temp)
+                        rd.append(rd_temp)
+                        j += 1
                     X = np.concatenate(X, axis=1)
                 else:
-                    X, fd, rd = __to_numerical__(df[items[i]].to_list(), one_hot=True)
+                    if fdicts is None:
+                        X, fd, rd = __to_numerical__(df[items[i]].to_list(), one_hot=True)
+                    else:
+                        X, fd, rd = __to_numerical__(df[items[i]].to_list(), one_hot=True, fdict=fdicts[i])
                 X = torch.tensor(X, dtype=torch.float32, device='cpu')
             elif dtypes[i] == 'image':
                 X = df[items[i]].to_list()
