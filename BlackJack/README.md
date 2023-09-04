@@ -1,5 +1,5 @@
 ## 基本的な設計思想
-- ディーラープログラムとプレイヤープログラムが分かれており，ソケット通信をしながらゲームを進めます．
+- ディーラープログラムとプレイヤープログラムに分かれており，両者がソケット通信をしながらゲームを進めます．
   - 様々な戦略のプレイヤーが同一のディーラーを相手に戦っている，ような雰囲気を出すための設計です．
 - ディーラーにしか把握できない（はずの）情報は全てディーラープログラム側（dealer.py）に記載されています．
   - ですので，config.py や classes.py に記載の情報はプレイヤープログラム側から参照してOKです．
@@ -19,7 +19,7 @@
 ディーラープログラム．基本的に実行するだけです．  
 終了したい場合は Ctrl+C で止めて下さい．
 
-**コマンド**
+**コマンド例**
 ```
 python dealer.py
 ```
@@ -32,7 +32,7 @@ python dealer.py
 
 ディーラープログラムを相手に人間がプレイする際に使用するプログラム．GUIで操作できます．
 
-**コマンド**
+**コマンド例**
 ```
 python human_player.py --history play_log.csv
 ```
@@ -41,7 +41,7 @@ python human_player.py --history play_log.csv
 - history
   - プレイヤーが取った行動をログとして記録する際の記録先ファイル．
     - このログファイルをニューラルネットワークの学習データとして使用することも可能です．
-    - また，348～360行目の get_state 関数を改造し，さらに384行目と395行目を適切に修正すれば，  
+    - また，409～423行目の get_state 関数を改造し，さらに445行目と456行目の print 文を適切に修正すれば，  
     様々な情報を記録できるようになります．
   - 指定しなかった場合，デフォルト値として play_log.csv がセットされます．
 
@@ -49,7 +49,7 @@ python human_player.py --history play_log.csv
 
 ランダム戦略（現在の状態に関係なくランダムに行動を選択する戦略）で動作するAIプレイヤーのプログラム．  
 
-**コマンド**
+**コマンド例**
 ```
 python ai_player_rand.py --games 10 --history play_log.csv
 ```
@@ -60,7 +60,7 @@ python ai_player_rand.py --games 10 --history play_log.csv
   - 指定しなかった場合，デフォルト値として 1 がセットされます（つまり1回だけプレイして終了）．
 - history
   - AIプレイヤーが選択した行動をログとして記録する際の記録先ファイル．
-    - 180～194行目の get_state 関数を改造し，さらに224行目と255行目を適切に修正すれば，  
+    - 225～239行目の get_state 関数を改造し，さらに271行目と302行目の print 文を適切に修正すれば，  
     様々な情報を記録できるようになります．
   - 指定しなかった場合，デフォルト値として play_log.csv がセットされます．
 
@@ -68,7 +68,7 @@ python ai_player_rand.py --games 10 --history play_log.csv
 
 ニューラルネットワークに基づいて行動を選択するAIプレイヤーのプログラム．  
 
-**コマンド**
+**コマンド例**
 ```
 python ai_player_NN.py --games 10 --history play_log.csv --gpu 0 --model BJNet_model.pth
 ```
@@ -79,7 +79,7 @@ python ai_player_NN.py --games 10 --history play_log.csv --gpu 0 --model BJNet_m
   - 指定しなかった場合，デフォルト値として 1 がセットされます（つまり1回だけプレイして終了）．
 - history
   - AIプレイヤーが選択した行動をログとして記録する際の記録先ファイル．
-    - 198～212行目の get_state 関数を改造し，さらに245行目と282行目を適切に修正すれば，  
+    - 243～257行目の get_state 関数を改造し，さらに290行目と327行目の print 文を適切に修正すれば，  
     様々な情報を記録できるようになります．
   - 指定しなかった場合，デフォルト値として play_log.csv がセットされます．
 - gpu
@@ -94,16 +94,16 @@ python ai_player_NN.py --games 10 --history play_log.csv --gpu 0 --model BJNet_m
 
 Q学習を用いてリアルタイムに戦略（行動選択基準）を獲得するAIプレイヤーのプログラム．  
 
-**コマンド**
+**コマンド例**
 ```
 # 一から学習する場合
-python ai_player_Q.py --games 10 --history play_log.csv --save result_QTable.pkl
+python ai_player_Q.py --games 10 --history play_log.csv --save QTable.pkl
 
 # 学習済みQテーブルをロードし，そこから学習を再開する場合
-python ai_player_Q.py --games 10 --history play_log.csv --load initial_QTable.pkl --save result_QTable.pkl
+python ai_player_Q.py --games 10 --history play_log.csv --load QTable.pkl --save new_QTable.pkl
 
 # 学習済みQテーブルをロードして単にゲームをプレイするだけの場合
-python ai_player_Q.py --games 10 --history play_log.csv --load initial_QTable.pkl --testmode
+python ai_player_Q.py --games 10 --history play_log.csv --load QTable.pkl --testmode
 ```
 
 **オプション**
@@ -112,7 +112,7 @@ python ai_player_Q.py --games 10 --history play_log.csv --load initial_QTable.pk
   - 指定しなかった場合，デフォルト値として 1 がセットされます（つまり1回だけプレイして終了）．
 - history
   - AIプレイヤーが選択した行動をログとして記録する際の記録先ファイル．
-    - 188～202行目の get_state 関数を改造し，さらに250行目と291行目を適切に修正すれば，  
+    - 233～247行目の get_state 関数を改造し，さらに297行目と338行目の print 文を適切に修正すれば，  
     様々な情報を記録できるようになります．
   - 指定しなかった場合，デフォルト値として play_log.csv がセットされます．
 - load
@@ -127,13 +127,15 @@ python ai_player_Q.py --games 10 --history play_log.csv --load initial_QTable.pk
 
 ## log_selector.py
 
-プレイヤープログラム実行時に出力されたログファイルから「都合が良い」行のみを抽出するプログラム．  
+プレイヤープログラム実行時に出力されたログファイルから「都合が良い」行のみを抽出するプログラム（のひな型）．  
 特定条件下のログのみ（例えば勝った時のログのみ，など）を用いて  
 ニューラルネットワークを学習したい場合に使用する想定で用意しました．  
-なお，何を以て「都合が良い」とするかはプレイヤーAIの実装方針に沿って各自で策定して頂き，  
-その内容に応じて16行目の内容をご変更ください（13～15行目に記載のコメントも参照）．  
+なお，何をもって「都合が良い」とするかはプレイヤーAIの実装方針に沿って各自で策定して頂き，  
+その内容に応じて16行目の内容をご変更ください（元の記載のままではロクなAIプレイヤーになりません）．  
+16行目そのものを削除し，独自の方針でプログラムを改造して頂いても問題ございません．  
+また，ログファイル解析・抽出用の独自プログラムを用意して頂くのもOKです．  
 
-**コマンド**
+**コマンド例**
 ```
 python log_selector.py --in_file play_log.csv --out_file selected_log.csv
 ```
@@ -152,7 +154,7 @@ AIプレイヤーの行動選択用ニューラルネットワークを学習す
 もしくは log_selector.py で抽出したログファイルを学習データとして使用する想定です．  
 学習データとして読み込むファイルは17行目で指定します．  
 
-**コマンド**
+**コマンド例**
 ```
 python NN_train.py --gpu 0 --epochs 50 --batchsize 100 --model BJNet_model.pth --autosave
 ```
@@ -179,7 +181,7 @@ python NN_train.py --gpu 0 --epochs 50 --batchsize 100 --model BJNet_model.pth -
 
 保存済みのQテーブル（ai_player_Q.py で学習したもの）の内容を出力するプログラム．
 
-**コマンド**
+**コマンド例**
 ```
 python QTable_checker.py --file QTable.pkl
 
@@ -199,7 +201,7 @@ NN_train.py による学習結果の保存先として使用する想定のフ�
 ## imgs
 
 トランプカードの図柄画像が収められています（human_player.py でのみ使用）．  
-なお，素材は下記サイトからお借りしました．  
+なお，素材は下記サイトから拝借しました．  
 https://chicodeza.com/freeitems/torannpu-illust.html
 
 ## その他
@@ -207,6 +209,7 @@ https://chicodeza.com/freeitems/torannpu-illust.html
 以下のソースファイルは実行対象ではありません．
 - **NN_structure.py**
   - ai_player_NN.py で使用するニューラルネットワークの構造が記載されているファイル．
+  - ニューラルネットワークを改造する際には，このファイルをご修正ください．
 - **classes.py**
   - カードの配布とシャッフル，手札の管理，ディーラーとプレイヤーの通信処理など，  
   雑多な処理を担当するクラス群が記載されているファイル．
