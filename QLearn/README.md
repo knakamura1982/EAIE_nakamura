@@ -1,32 +1,32 @@
 ## 全体を通して
 
-主にOpenAI Gymの制御系タスクを題材としてQ学習を試みるプログラム群です．  
+主に OpenAI Gym (gymnasium) の制御系タスクを題材としてQ学習を試みるプログラム群です．  
 これらのタスクは，本来，deep neural network でQ学習を実現する Deep Q Network (DQN) で解くことを想定されていますが，  
 ここでは伝統的な（通常の）Q学習で解くことを試みます（このため，あまり上手くはいかないかもしれません）．
 
 取り上げるのは，最も単純と思われる以下の4つのタスクです．  
 下記のサイトに各タスクの情報が簡単にまとめられていますので，併せてご参照ください．  
-https://github.com/openai/gym/wiki/Leaderboard
+https://gymnasium.farama.org/
 
-## CartPole_v0.py
+## CartPole_v1.py
 
-OpenAI Gym の Classic Control タスクの一つ CartPole-v0 を通常のQ学習で解くプログラム（のひな型）．  
+OpenAI Gym (gymnasium) の Classic Control タスクの一つ CartPole-v1 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどをご参照ください．  
-https://github.com/openai/gym/wiki/CartPole-v0
+https://gymnasium.farama.org/environments/classic_control/cart_pole/
 
-**コマンド**
+**コマンド例**
 ```
 # 一から学習する場合
-python CartPole_v0.py --games 10 --max_steps 200 --save result_QTable.pkl
+python CartPole_v1.py --games 10 --max_steps 200 --save QTable.pkl
 
-# 学習済みQテーブルをロードし，そこから学習を再開する場合
-python CartPole_v0.py --games 10 --max_steps 200 --load initial_QTable.pkl --save result_QTable.pkl
+# 学習済みQテーブルをロードし，そこから学習を再開して新たなQテーブルを作成・保存する場合
+python CartPole_v1.py --games 10 --max_steps 200 --load QTable.pkl --save new_QTable.pkl
 
 # 学習済みQテーブルをロードして単にタスクを実行するだけの場合
-python CartPole_v0.py --games 10 --max_steps 200 --load initial_QTable.pkl --testmode
+python CartPole_v1.py --games 10 --max_steps 200 --load QTable.pkl --testmode
 
 # Qテーブルを用いずにランダム戦略でタスクを実行する場合
-python CartPole_v0.py --games 10 --max_steps 200 --randmode
+python CartPole_v1.py --games 10 --max_steps 200 --randmode
 ```
 **オプション**
 - games
@@ -35,7 +35,7 @@ python CartPole_v0.py --games 10 --max_steps 200 --randmode
 - max_steps
   - 1ゲームあたりの最大ステップ数
   - ステップ数がこのオプションで指定した値を超えると，  
-  終了条件を満たしていなくても現在のゲームを打ち切り，次のゲームに移行します．
+  終了条件を満たしていなくても現在のゲームを打ち切り，次のゲームに移行します．  
   - 指定しない場合，デフォルト値として 200 がセットされます．
 - load
   - 指定したファイルからQテーブルをロードします．
@@ -53,76 +53,76 @@ python CartPole_v0.py --games 10 --max_steps 200 --randmode
 
 ## MountainCar_v0.py
 
-OpenAI Gym の Classic Control タスクの一つ MountainCar-v0 を通常のQ学習で解くプログラム（のひな型）．  
+OpenAI Gym (gymnasium) の Classic Control タスクの一つ MountainCar-v0 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどをご参照ください．  
-https://github.com/openai/gym/wiki/MountainCar-v0
+https://gymnasium.farama.org/environments/classic_control/mountain_car/
 
-**コマンド**
+**コマンド例**
 ```
 # 一から学習する場合
-python MountainCar_v0.py --games 10 --max_steps 200 --save result_QTable.pkl
+python MountainCar_v0.py --games 10 --max_steps 200 --save QTable.pkl
 
-# 学習済みQテーブルをロードし，そこから学習を再開する場合
-python MountainCar_v0.py --games 10 --max_steps 200 --load initial_QTable.pkl --save result_QTable.pkl
+# 学習済みQテーブルをロードし，そこから学習を再開して新たなQテーブルを作成・保存する場合
+python MountainCar_v0.py --games 10 --max_steps 200 --load QTable.pkl --save new_QTable.pkl
 
 # 学習済みQテーブルをロードして単にタスクを実行するだけの場合
-python MountainCar_v0.py --games 10 --max_steps 200 --load initial_QTable.pkl --testmode
+python MountainCar_v0.py --games 10 --max_steps 200 --load QTable.pkl --testmode
 
 # Qテーブルを用いずにランダム戦略でタスクを実行する場合
 python MountainCar_v0.py --games 10 --max_steps 200 --randmode
 ```
 **オプション**
-- いずれも CartPole_v0.py の同名オプションと全く同じです．
+- いずれも CartPole_v1.py の同名オプションと全く同じです．
 
 ## Acrobot_v1.py
 
-OpenAI Gym の Classic Control タスクの一つ Acrobot-v1 を通常のQ学習で解くプログラム（のひな型）．  
+OpenAI Gym (gymnasium) の Classic Control タスクの一つ Acrobot-v1 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどをご参照ください．  
-https://www.tcom242242.net/entry/ai-2/%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92/acrobot/
+https://gymnasium.farama.org/environments/classic_control/acrobot/
 
-**コマンド**
+**コマンド例**
 ```
 # 一から学習する場合
-python Acrobot_v1.py --games 10 --max_steps 200 --save result_QTable.pkl
+python Acrobot_v1.py --games 10 --max_steps 200 --save QTable.pkl
 
-# 学習済みQテーブルをロードし，そこから学習を再開する場合
-python Acrobot_v1.py --games 10 --max_steps 200 --load initial_QTable.pkl --save result_QTable.pkl
+# 学習済みQテーブルをロードし，そこから学習を再開して新たなQテーブルを作成・保存する場合
+python Acrobot_v1.py --games 10 --max_steps 200 --load QTable.pkl --save new_QTable.pkl
 
 # 学習済みQテーブルをロードして単にタスクを実行するだけの場合
-python Acrobot_v1.py --games 10 --max_steps 200 --load initial_QTable.pkl --testmode
+python Acrobot_v1.py --games 10 --max_steps 200 --load QTable.pkl --testmode
 
 # Qテーブルを用いずにランダム戦略でタスクを実行する場合
 python Acrobot_v1.py --games 10 --max_steps 200 --randmode
 ```
 **オプション**
-- いずれも CartPole_v0.py の同名オプションと全く同じです．
+- いずれも CartPole_v1.py の同名オプションと全く同じです．
 
 ## LunarLander_v2.py
 
-OpenAI Gym の Box2D タスクの一つ LunarLander-v2 を通常のQ学習で解くプログラム（のひな型）．  
+OpenAI Gym (gymnasium) の Box2D タスクの一つ LunarLander-v2 を通常のQ学習で解くプログラム（のひな型）．  
 タスクの内容については下記サイトなどをご参照ください．  
-https://shiva-verma.medium.com/solving-lunar-lander-openaigym-reinforcement-learning-785675066197
+https://gymnasium.farama.org/environments/box2d/lunar_lander/
 
-**コマンド**
+**コマンド例**
 ```
 # 一から学習する場合
-python LunarLander_v2.py --games 10 --max_steps 200 --save result_QTable.pkl
+python LunarLander_v2.py --games 10 --max_steps 200 --save QTable.pkl
 
-# 学習済みQテーブルをロードし，そこから学習を再開する場合
-python LunarLander_v2.py --games 10 --max_steps 200 --load initial_QTable.pkl --save result_QTable.pkl
+# 学習済みQテーブルをロードし，そこから学習を再開して新たなQテーブルを作成・保存する場合
+python LunarLander_v2.py --games 10 --max_steps 200 --load QTable.pkl --save new_QTable.pkl
 
 # 学習済みQテーブルをロードして単にタスクを実行するだけの場合
-python LunarLander_v2.py --games 10 --max_steps 200 --load initial_QTable.pkl --testmode
+python LunarLander_v2.py --games 10 --max_steps 200 --load QTable.pkl --testmode
 
 # Qテーブルを用いずにランダム戦略でタスクを実行する場合
 python LunarLander_v2.py --games 10 --max_steps 200 --randmode
 ```
 **オプション**
-- いずれも CartPole_v0.py の同名オプションと全く同じです．
+- いずれも CartPole_v1.py の同名オプションと全く同じです．
 
 ## myGame.py
 
-これは OpenAI Gym のタスクではなく，Q学習によるAI実装のデモ用に本リポジトリの作者が自作したミニゲームです．  
+これは OpenAI Gym (gymnasium) のタスクではなく，Q学習によるAI実装のデモ用に本リポジトリの作者が自作したミニゲームです．  
 人間がキーボード操作でプレイすることも一応可能です．
 
 **ゲーム内容**
@@ -153,9 +153,9 @@ python LunarLander_v2.py --games 10 --max_steps 200 --randmode
 - ε-greedyにおけるε: 0.1
 - なお，学習率，割引率，ε の値は 33～35 行目の定数値をいじることにより変更可能
 
-**コマンド**
+**コマンド例**
 ```
-python myGame.py --load initial_QTable.pkl --save result_QTable.pkl --history mygame_score_log.csv
+python myGame.py --load QTable.pkl --save new_QTable.pkl --history mygame_score_log.csv
 ```
 **オプション**
 - load
@@ -174,15 +174,17 @@ python myGame.py --load initial_QTable.pkl --save result_QTable.pkl --history my
 
 **コマンド**
 ```
-python QTable_checker.py --file QTable.pkl
+python QTable_checker.py --name myGame --file QTable.pkl
 
 # 以下のようにして csv ファイルに書き出してから Excel で確認した方が分かりやすいかも
-python QTable_checker.py --file QTable.pkl > QTable.csv
+python QTable_checker.py --name myGame --file QTable.pkl > QTable.csv
 ```
 
 **オプション**
+- name
+  - ゲームの名称（myGame, CartPole_v1, MountainCar_v0, Acrobot_v1, LunarLander_v2 のいずれか）．
 - file
-  - 上述の各種プログラムで保存したQテーブルファイル．
+  - nameオプションで指定したタスクの実行時に保存されたQテーブルファイル．
 
 **余談**
 
