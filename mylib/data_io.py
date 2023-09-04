@@ -44,14 +44,19 @@ def __to_numerical__(cat_data, one_hot=False, fdict=None):
 #   - fdicts: カテゴリデータを整数値に変換するための正引き辞書（Noneの場合は自動作成）
 #   - dirname: データ型が 'image' のとき, ファイル名の先頭に付加するディレクトリ名を指定するのに使用
 #   - img_mode: データ型が 'image' のとき, カラー画像か否かを指定するのに使用（ 'color' か 'grayscale' のいずれか）
+#   - img_range: データ型が 'image' のとき, 画素値をどの範囲の値に正規化するか（ [0, 1] または [-1, 1] を想定しているが，それ以外の範囲も指定可能）
+#   - img_transform: データ型が 'image' のとき, 前処理として使用する Transform オブジェクト
 class CSVBasedDataset(Dataset):
 
     # コンストラクタ
-    def __init__(self, filename, items, dtypes, fdicts=None, dirname='./', img_mode=''):
+    def __init__(self, filename, items, dtypes, fdicts=None, dirname='./', img_mode='', img_range=[0, 1], img_transform=None):
         super(CSVBasedDataset, self).__init__()
 
         self.dtypes = dtypes
         self.dirname = dirname
+        self.img_range = img_range
+        self.img_range_coeff = (self.img_range[1] - self.img_range[0]) / 255
+        self.img_transform = img_transform
         if img_mode == 'color':
             self.img_mode = torchvision.io.image.ImageReadMode.RGB
         elif img_mode == 'grayscale':
@@ -136,8 +141,11 @@ class CSVBasedDataset(Dataset):
         single_data = []
         for i in range(len(self.data)):
             if self.dtypes[i] == 'image':
-                # 実際に画像ファイルを読み込み，画素値を 0～1 に正規化する（元々が 0~255 なので, 255 で割る）
-                x = torchvision.io.read_image(os.path.join(self.dirname, self.data[i][index]), mode=self.img_mode) / 255
+                # 実際に画像ファイルを読み込み，画素値を正規化する
+                x = torchvision.io.read_image(os.path.join(self.dirname, self.data[i][index]), mode=self.img_mode)
+                x = x * self.img_range_coeff + self.img_range[0]
+                if self.img_transform is not None:
+                    x = self.img_transform(x)
             else:
                 x = self.data[i][index]
             single_data.append(x)
@@ -217,3 +225,11 @@ def to_tanh_image(img):
 # 画素値の範囲を [-1, 1] から [0, 1] に変更
 def to_sigmoid_image(img):
     return 0.5 * (img + 1)
+
+
+# モデル保存用にファイル名を調整する
+#   - base: 基本となるファイル名
+#   - ep: エポック番号
+def autosaved_model_name(base: str, ep: int):
+    p = base.rfind('.')
+    return '{0}_ep{1}.pth'.format(base[:p], ep)

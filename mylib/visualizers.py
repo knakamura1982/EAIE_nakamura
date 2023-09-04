@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -42,8 +43,6 @@ class ClassifierVisualizer():
             x = hrange[0] + x * (hrange[1] - hrange[0]) / (size - 1)
             c = np.concatenate([x, y], axis=1)
             self.data = c if i == 0 else np.concatenate([self.data, c], axis=0)
-        fig = plt.figure()
-        self.ax = fig.add_subplot(1, 1, 1)
 
     # 可視化の実行
     #   - model: 識別器クラスのインスタンス
@@ -59,7 +58,7 @@ class ClassifierVisualizer():
             device = param.data.device
             break
 
-        self.ax.cla()
+        plt.cla()
 
         # パラメータ値に変更がある場合は更新
         if title is not None: self.title = title
@@ -69,7 +68,7 @@ class ClassifierVisualizer():
         if bins is not None: self.bins = bins
 
         # グラフタイトルの設定
-        self.ax.set_title(self.title)
+        plt.title(self.title)
 
         # 背景画像の作成
         model.eval()
@@ -86,7 +85,7 @@ class ClassifierVisualizer():
         del result
 
         # 背景画像の設定
-        self.ax.imshow(img)
+        plt.imshow(img)
 
         # 実データの描画
         if samples is not None:
@@ -96,27 +95,83 @@ class ClassifierVisualizer():
             pty = np.floor((self.size - 1) * (feat[:,1] - self.vrange[0]) / (self.vrange[1] - self.vrange[0])).astype(np.int32)
             for i in range(self.n_classes):
                 ccolor = np.asarray(class_colors[i]).reshape((1, 3)) / 255
-                self.ax.scatter(ptx[lab==i], pty[lab==i], c=ccolor, label=self.clabels[i])
-            self.ax.legend(loc='best')
+                plt.scatter(ptx[lab==i], pty[lab==i], c=ccolor, label=self.clabels[i])
+            plt.legend(loc='best')
 
         # 縦軸・横軸の目盛りの作成
-        self.ax.set_xticks(np.linspace(0, self.size-1, self.bins))
-        self.ax.set_yticks(np.linspace(0, self.size-1, self.bins))
         hlabels = []
         vlabels = []
         for i in range(0, self.bins):
             hlabels.append(format(self.hrange[0] + i * (self.hrange[1] - self.hrange[0]) / (self.bins - 1), '.3g'))
             vlabels.append(format(self.vrange[0] + i * (self.vrange[1] - self.vrange[0]) / (self.bins - 1), '.3g'))
-        self.ax.set_xticklabels(hlabels)
-        self.ax.set_yticklabels(vlabels)
-        self.ax.grid(True)
+        plt.xticks(np.linspace(0, self.size-1, self.bins), hlabels)
+        plt.yticks(np.linspace(0, self.size-1, self.bins), vlabels)
+        plt.grid()
 
         # 軸ラベルを設定
-        self.ax.set_xlabel(self.hlabel)
-        self.ax.set_ylabel(self.vlabel)
+        plt.xlabel(self.hlabel)
+        plt.ylabel(self.vlabel)
 
         # 縦軸の上下を反転
-        self.ax.invert_yaxis()
+        plt.gca().invert_yaxis()
 
         # 表示（1秒後にウィンドウを閉じる）
         plt.pause(sec)
+
+
+# 損失関数値の可視化器
+class LossVisualizer():
+
+    # コンストラクタ
+    #   - items: 可視化する損失の名称を列挙したリスト
+    #   - log_mode: 縦軸を対数スケールにするか否か
+    def __init__(self, items, log_mode=False):
+        self.log_mode = log_mode
+        self.loss_values = {}
+        for item in items:
+            if not item in self.loss_values.keys():
+                self.loss_values[item] = np.empty(0)
+
+    # 値の追加
+    #   - item: 追加対象の損失の名称
+    #   - value: 追加する値
+    def add_value(self, item, value):
+        if item in self.loss_values.keys():
+            self.loss_values[item] = np.append(self.loss_values[item], value)
+
+    # 可視化の実行
+    #   - sec: 表示時間（秒数. 1 未満のときは 1 に丸め込む. デフォルトでは 1 秒）
+    def show(self, sec=1):
+        plt.cla()
+        plt.title('Loss history')
+        plt.xlabel('epoch')
+        if self.log_mode:
+            plt.yscale('log')
+        plt.ylabel('loss value')
+        plt.grid()
+        for item in self.loss_values.keys():
+            t = np.arange(1, len(self.loss_values[item]) + 1)
+            plt.plot(t, self.loss_values[item], label=item)
+        plt.legend()
+        plt.pause(sec)
+
+    # 可視化結果および損失間数値の履歴をファイルに保存
+    #   - v_file: 可視化結果の保存先ファイル
+    #   - h_file: 損失間数値の履歴の保存先ファイル
+    def save(self, v_file, h_file):
+        plt.cla()
+        plt.title('Loss history')
+        plt.xlabel('epoch')
+        if self.log_mode:
+            plt.yscale('log')
+        plt.ylabel('loss value')
+        plt.grid()
+        for item in self.loss_values.keys():
+            t = np.arange(1, len(self.loss_values[item]) + 1)
+            plt.plot(t, self.loss_values[item], label=item)
+        plt.legend()
+        plt.savefig(v_file)
+        df = pd.DataFrame(self.loss_values, columns=self.loss_values.keys())
+        df.reset_index(drop=True, inplace=True)
+        df.index = np.arange(1, len(df)+1)
+        df.to_csv(h_file)
