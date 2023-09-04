@@ -2,17 +2,16 @@ import os
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 import sys
 sys.path.append(os.path.abspath('..'))
-import pickle
 import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from torch.utils.data import DataLoader, random_split
-from networks import SampleMLP
+from networks import SampleMLP, myMLP
 from mylib.data_io import CSVBasedDataset
 from mylib.visualizers import ClassifierVisualizer
-from mylib.option import print_args
+from mylib.utility import print_args
 
 
 # データセットファイル
@@ -52,8 +51,6 @@ dataset = CSVBasedDataset(
         'label' # Yの型
     ]
 )
-with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'wb') as fdicts_file:
-    pickle.dump(dataset.forward_dicts, fdicts_file)
 
 # 訓練データセットを分割し，一方を検証用に回す
 dataset_size = len(dataset)
@@ -80,6 +77,7 @@ if VISUALIZE:
 
 # ニューラルネットワークの作成
 model = SampleMLP().to(DEVICE)
+#model = myMLP().to(DEVICE) # myMLPクラスを用いる場合はこちらを使用
 
 # 最適化アルゴリズムの指定（ここでは Adam を使用）
 optimizer = optim.Adam(model.parameters())

@@ -2,14 +2,13 @@ import os
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 import sys
 sys.path.append(os.path.abspath('..'))
-import pickle
 import argparse
 import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from networks import SampleCNN
+from networks import SampleCNN, myCNN
 from mylib.data_io import CSVBasedDataset
-from mylib.option import print_args
+from mylib.utility import print_args
 
 
 # データセットファイル
@@ -39,8 +38,6 @@ MODEL_PATH = args['model']
 
 
 # CSVファイルを読み込み, 訓練データセットを用意
-with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'rb') as fdicts_file:
-    fdicts = pickle.load(fdicts_file)
 test_dataset = CSVBasedDataset(
     filename = DATASET_CSV,
     items = [
@@ -51,8 +48,7 @@ test_dataset = CSVBasedDataset(
         'image', # Xの型
         'label' # Yの型
     ],
-    dirname = DATA_DIR,
-    fdicts = fdicts
+    dirname = DATA_DIR
 )
 test_size = len(test_dataset)
 
@@ -64,6 +60,7 @@ test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False,
 
 # ニューラルネットワークの作成
 model = SampleCNN(C=C, H=H, W=W, N=n_classes)
+#model = myCNN(C=C, H=H, W=W, N=n_classes) # myCNNクラスを用いる場合はこちらを使用
 model.load_state_dict(torch.load(MODEL_PATH))
 model = model.to(DEVICE)
 model.eval()

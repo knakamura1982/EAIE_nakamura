@@ -2,16 +2,15 @@ import os
 os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
 import sys
 sys.path.append(os.path.abspath('..'))
-import pickle
 import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from torch.utils.data import DataLoader, random_split
-from networks import SampleCNN
+from networks import SampleCNN, myCNN
 from mylib.data_io import CSVBasedDataset
-from mylib.option import print_args
+from mylib.utility import print_args
 
 
 # データセットファイル
@@ -56,8 +55,6 @@ dataset = CSVBasedDataset(
     ],
     dirname = DATA_DIR
 )
-with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'wb') as fdicts_file:
-    pickle.dump(dataset.forward_dicts, fdicts_file)
 
 # 認識対象のクラス数を取得
 n_classes = len(dataset.forward_dicts[1])
@@ -74,6 +71,7 @@ valid_dataloader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=Fals
 
 # ニューラルネットワークの作成
 model = SampleCNN(C=C, H=H, W=W, N=n_classes).to(DEVICE)
+#model = myCNN(C=C, H=H, W=W, N=n_classes).to(DEVICE) # myCNNクラスを用いる場合はこちらを使用
 
 # 最適化アルゴリズムの指定（ここでは Adam を使用）
 optimizer = optim.Adam(model.parameters())
