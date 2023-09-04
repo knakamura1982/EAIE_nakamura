@@ -15,7 +15,7 @@ CSVの学習データセットを読み込んでニューラルネットワー�
 データセットとして weather_train.csv を使用することを前提としています．  
 可視化が不要な場合や，データセットを weather_train.csv から変更する場合は，VISUALIZE = False としてください．
 
-**コマンド**
+**コマンド例**
 ```
 python MLP_train.py --gpu 0 --epochs 50 --batchsize 100 --model MLP_model.pth --autosave
 ```
@@ -42,7 +42,7 @@ python MLP_train.py --gpu 0 --epochs 50 --batchsize 100 --model MLP_model.pth --
 上記の MLP_train.py で学習したニューラルネットワークのテストを行うプログラム．  
 使用するテストデータセットは15行目で指定します．
 
-**コマンド**
+**コマンド例**
 ```
 python MLP_test.py --gpu 0 --batchsize 100 --model MLP_model.pth
 ```
@@ -80,7 +80,7 @@ tar -xzvf MNIST.tar.gz
 画像データセットを読み込んで畳込みニューラルネットワークを学習するプログラム．  
 読み込むデータセットは17行目で指定します．
 
-**コマンド**
+**コマンド例**
 ```
 python CNN_train.py --gpu 0 --epochs 10 --batchsize 100 --model CNN_model.pth --autosave
 ```
@@ -106,7 +106,7 @@ python CNN_train.py --gpu 0 --epochs 10 --batchsize 100 --model CNN_model.pth --
 上記の CNN_train.py で学習したニューラルネットワークのテストを行うプログラム．  
 使用するテストデータセットは15行目で指定します．
 
-**コマンド**
+**コマンド例**
 ```
 python CNN_test.py --gpu 0 --batchsize 100 --model CNN_model.pth
 ```
