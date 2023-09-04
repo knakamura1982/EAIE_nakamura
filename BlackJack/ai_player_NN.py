@@ -8,9 +8,9 @@ import argparse
 import torch
 import numpy as np
 from classes import Action, Player, get_card_info, get_action_name
-from config import PORT, BET, INITIAL_MONEY, N_DECKS, SHUFFLE_INTERVAL
+from config import PORT, BET, INITIAL_MONEY, N_DECKS
 from NN_structure import BJNet
-from mylib.option import print_args
+from mylib.utility import print_args
 
 
 # 学習結果の保存先フォルダ
@@ -30,7 +30,7 @@ nn_model = None
 
 # 行動リスト
 # ニューラルネットワークのクラス番号の順番に合わせて並べる（基本的にアルファベット順になるはず）
-action_set = [Action.DOUBLE_DOWN, Action.HIT, Action.STAND, Action.SURRENDER]
+action_set = [Action.DOUBLE_DOWN, Action.HIT, Action.RETRY, Action.STAND, Action.SURRENDER]
 
 
 ### 関数 ###
@@ -52,6 +52,13 @@ def game_start(game_ID=0):
     print('Action: BET')
     print('  money: ', money, '$')
     print('  bet: ', bet, '$')
+
+    # ディーラーから「カードシャッフルを行ったか否か」の情報を取得
+    # シャッフルが行われた場合は True が, 行われなかった場合は False が，変数 cardset_shuffled にセットされる
+    # なお，本サンプルコードではここで取得した情報は使用していない
+    cardset_shuffled = player.receive_card_shuffle_status(soc)
+    if cardset_shuffled:
+        print('Dealer said: Card set has been shuffled before this game.')
 
     # ディーラーから初期カード情報を受信
     dc, pc1, pc2 = player.receive_init_cards(soc)
@@ -179,6 +186,42 @@ def surrender():
     print('  money: ', player.get_money(), '$')
     return reward, True, status
 
+# RETRYを実行する
+def retry():
+    global player, soc
+
+    print('Action: RETRY')
+
+    # ベット額の 1/4 を消費
+    penalty = player.current_bet // 4
+    player.consume_money(penalty)
+    print('  player-card {0} has been removed.'.format(player.get_num_player_cards()))
+    print('  money: ', player.get_money(), '$')
+
+    # ディーラーにメッセージを送信
+    player.send_message(soc, 'retry')
+
+    # ディーラーから情報を受信
+    pc, score, status, rate, dc = player.receive_message(dsoc=soc, get_player_card=True, get_dealer_cards=True, retry_mode=True)
+    print('  player-card {0}: '.format(player.get_num_player_cards()), get_card_info(pc))
+    print('  current score: ', score)
+
+    # バーストした場合はゲーム終了
+    if status == 'bust':
+        for i in range(len(dc)):
+            print('  dealer-card {0}: '.format(i+2), get_card_info(dc[i]))
+        print("  dealer's score: ", player.get_dealer_score())
+        soc.close() # ディーラーとの通信をカット
+        reward = player.update_money(rate=rate) # 所持金額を更新
+        print('Game finished.')
+        print('  result: bust')
+        print('  money: ', player.get_money(), '$')
+        return reward-penalty, True, status
+
+    # バーストしなかった場合は続行
+    else:
+        return -penalty, False, status
+
 # 行動の実行
 def act(action: Action):
     if action == Action.HIT:
@@ -189,6 +232,8 @@ def act(action: Action):
         return double_down()
     elif action == Action.SURRENDER:
         return surrender()
+    elif action == Action.RETRY:
+        return retry()
     else:
         exit()
 
@@ -211,7 +256,7 @@ def get_state():
 
     return state
 
-# 行動戦略（現状態 state によらずランダム選択）
+# 行動戦略
 def select_action(state):
     global nn_model
 
@@ -229,7 +274,7 @@ def select_action(state):
 
 ### ここから処理開始 ###
 
-parser = argparse.ArgumentParser(description='AI Black Jack Player (random strategy)')
+parser = argparse.ArgumentParser(description='AI Black Jack Player (Neural Network-based)')
 parser.add_argument('--games', type=int, default=1, help='num. of games to play')
 parser.add_argument('--history', type=str, default='play_log.csv', help='filename where game history will be saved')
 parser.add_argument('--model', default=os.path.join(MODEL_DIR, 'model.pth'), type=str, help='file path of trained model')
@@ -268,7 +313,7 @@ for n in range(1, n_games):
         # 選択した行動を実際に実行
         # 戻り値:
         #   - done: 終了フラグ．今回の行動によりゲームが終了したか否か（終了した場合はTrue, 続行中ならFalse）
-        #   - reward: 獲得金額（ゲーム続行中の場合は 0 ）
+        #   - reward: 獲得金額（ゲーム続行中の場合は 0 , ただし RETRY を実行した場合は1回につき -BET/4 ）
         #   - status: 行動実行後のプレイヤーステータス（バーストしたか否か，勝ちか負けか，などの状態を表す文字列）
         reward, done, status = act(action)
 

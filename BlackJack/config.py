@@ -10,8 +10,11 @@ INITIAL_MONEY = 10000
 # 使用するデッキの数
 N_DECKS = 2
 
-# カードシャッフルのあと何回続けてゲームをするか
-SHUFFLE_INTERVAL = 10
+# 何ゲームに1回の割合でカードシャッフルを行うか
+SHUFFLE_INTERVAL = 20
+
+# カードの残数が何枚を下回った時点で強制的にカードシャッフルを行うか
+SHUFFLE_THRESHOLD = 20
 
 # 1ゲームで引けるカードの最大枚数
 MAX_CARDS_PER_GAME = 6

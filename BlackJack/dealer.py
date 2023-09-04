@@ -1,6 +1,7 @@
 import socket
+import numpy as np
 from classes import Action, CardSet, Hand
-from config import PORT, N_DECKS, SHUFFLE_INTERVAL, MAX_CARDS_PER_GAME
+from config import PORT, N_DECKS, SHUFFLE_INTERVAL, SHUFFLE_THRESHOLD, MAX_CARDS_PER_GAME
 
 
 # ディーラークラス
@@ -17,13 +18,15 @@ class Dealer():
 
     # コンストラクタ
     #   - n_decks: 使用するデッキの数
-    #   - shuffle_interval: カードシャッフルのあと何回続けてゲームをするか
+    #   - shuffle_interval: 何ゲームに1回の割合でカードシャッフルを行うか
+    #   - shuffle_threshold: カードの残数が何枚を下回った時点で強制的にカードシャッフルを行うか
     #   - max_cards_per_game: 1ゲームで引けるカードの最大枚数
-    def __init__(self, n_decks: int, shuffle_interval: int, max_cards_per_game: int):
+    def __init__(self, n_decks: int, shuffle_interval: int, shuffle_threshold: int, max_cards_per_game: int):
 
         # パラメータをメンバ変数にセット
         self.n_decks = n_decks
         self.shuffle_interval = shuffle_interval
+        self.shuffle_threshold = shuffle_threshold
         self.max_cards_per_game = max_cards_per_game
 
         # カードセットの用意
@@ -81,8 +84,13 @@ class Dealer():
 
         return_value = False
 
-        # 必要ならカードシャッフル
+        ### 必要ならカードシャッフル ###
+        # 何ゲームかに1回の割合で定期的にシャッフルする場合
         if self.game_ID % self.shuffle_interval == 0:
+            self.card_set.shuffle()
+            return_value = True
+        # カードの残数が閾値を下回った時点で不定期にシャッフルする場合
+        elif self.get_num_remaining_cards() < self.shuffle_threshold:
             self.card_set.shuffle()
             return_value = True
 
@@ -110,7 +118,9 @@ class Dealer():
         return self.player_hand.is_busted()
 
     # プレイヤーに1枚カードを配布
-    def draw_player_card(self):
+    def draw_player_card(self, retry_mode=False):
+        if retry_mode:
+            self.player_hand.pop()
         self.player_hand.append(self.card_set.draw())
 
     # ルールに従ってディーラーカードを追加
@@ -118,6 +128,14 @@ class Dealer():
     def draw_dealer_cards(self):
         while self.dealer_hand.get_score() < 17 and len(self.dealer_hand.cards) < self.max_cards_per_game:
             self.dealer_hand.append(self.card_set.draw())
+
+    # カードシャッフルを行ったか否かをプレイヤーに通知
+    def send_card_shuffle_status(self, psoc: socket.socket, status: bool):
+        if status:
+            psoc.send(bytes("shuffled,yes", 'utf-8'))
+        else:
+            psoc.send(bytes("shuffled,no", 'utf-8'))
+        ack = psoc.recv(1024).decode("utf-8") # 確認応答を受信
 
     # プレイヤーに初期カード情報を送信
     #   - psoc: プレイヤーとの間でのメッセージを送受信するためのソケット
@@ -160,14 +178,19 @@ class Dealer():
             return Action.DOUBLE_DOWN
         elif msg == 'surrender':
             return Action.SURRENDER
+        elif msg == 'retry':
+            return Action.RETRY
         else:
             return Action.UNDEFINED
 
 
 ### ここから処理開始 ###
 
+# 乱数シードを固定する場合は以下をアンコメント（「314」の部分には適当なシード値を入れる）
+#np.random.seed(314)
+
 # ディーラークラスのインスタンスを作成
-dealer = Dealer(n_decks=N_DECKS, shuffle_interval=SHUFFLE_INTERVAL, max_cards_per_game=MAX_CARDS_PER_GAME)
+dealer = Dealer(n_decks=N_DECKS, shuffle_interval=SHUFFLE_INTERVAL, shuffle_threshold=SHUFFLE_THRESHOLD, max_cards_per_game=MAX_CARDS_PER_GAME)
 
 # プレイヤーからの接続を受け付けるソケットを用意
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # プレイヤーからの通信受付用ソケット
@@ -176,7 +199,7 @@ soc.bind((socket.gethostname(), PORT))
 soc.listen(1)
 print('The dealer program has started!!')
 print()
-print('Wainting for a new player ...')
+print('Waiting for a new player ...')
 
 # Ctrl+C で停止されるまで，無限ループでゲームを続ける
 while True:
@@ -196,8 +219,9 @@ while True:
         cardset_shuffled = dealer.initialize_game()
         if cardset_shuffled is True:
             print('Card set has been shuffled.') # 初期化中にカードをシャッフルした場合はメッセージを表示
+        dealer.send_card_shuffle_status(player_soc, status=cardset_shuffled)
 
-        print('Num. remaining cards: ', dealer.get_num_remaining_cards())
+        print('Num. remaining cards: ', dealer.get_num_remaining_cards() + 4)
         print('Game start!!')
 
         # ディーラーカード1枚とプレイヤーカード2枚をプレイヤーに開示
@@ -257,6 +281,22 @@ while True:
                 print("The player's action: SURRENDER")
                 status = 'surrendered'
                 dealer.send_message(psoc=player_soc, rate=0.5, status=status, send_dealer_cards=True)
+
+            # RETRYの場合
+            elif action == Action.RETRY:
+                print("The player's action: RETRY")
+
+                # プレイヤーにカードを1枚配布
+                dealer.draw_player_card(retry_mode=True)
+
+                if dealer.player_is_busted():
+                    # プレイヤーがバーストした場合
+                    status = 'bust'
+                    dealer.send_message(psoc=player_soc, rate=0.0, status=status, send_player_card=True, send_dealer_cards=True)
+                else:
+                    # プレイヤーがバーストしなかった場合
+                    status = 'unsettled'
+                    dealer.send_message(psoc=player_soc, rate=0.0, status=status, send_player_card=True)
 
             # 定義されていないアクションは終了要求とみなす
             else:

@@ -11,6 +11,7 @@ class Action(Enum):
     STAND = 2
     DOUBLE_DOWN = 3
     SURRENDER = 4
+    RETRY = 5
 
 
 # 行動戦略の定義
@@ -19,6 +20,7 @@ class Strategy(Enum):
     RANDOM = 1
     QMAX = 2
     E_GREEDY = 3
+    MANUAL = 4 # myGame.pyでのみ有効（それ以外のケースではRANDOMと解釈される）
 
 
 # カードセット
@@ -65,6 +67,10 @@ class Hand:
     # カード c を追加
     def append(self, c):
         self.cards.append(c)
+
+    # 一番最後に取得したカードを破棄
+    def pop(self):
+        self.cards.pop()
 
     # 手札をクリア（0枚にする）
     def clear(self):
@@ -116,6 +122,8 @@ def get_action_name(action: Action):
         return 'DOUBLE DOWN'
     elif action == Action.SURRENDER:
         return 'SURRENDER'
+    elif action == Action.RETRY:
+        return 'RETRY'
     else:
         return 'UNDEFINED'
 
@@ -211,6 +219,21 @@ class Player:
         self.current_bet = 0
         return reward
 
+    # 所持金の一部を消費額
+    def consume_money(self, price: int):
+        self.money -= price
+
+    # ディーラーから「カードシャッフルを行ったか否か」の情報を取得
+    # シャッフルが行われた場合は True を, 行われなかった場合は False を返す
+    #   - dsoc: ディーラーとの間でのメッセージを送受信するためのソケット
+    def receive_card_shuffle_status(self, dsoc: socket.socket):
+        msg = dsoc.recv(1024).decode("utf-8").split(',')
+        dsoc.send(bytes('ack', 'utf-8')) # 確認応答を返送
+        if msg[1] == 'yes':
+            return True
+        else:
+            return False
+
     # ディーラーから初期カード情報を受信
     #   - dsoc: ディーラーとの間でのメッセージを送受信するためのソケット
     def receive_init_cards(self, dsoc: socket.socket):
@@ -235,10 +258,13 @@ class Player:
     #   - dsoc: ディーラーとの間でのメッセージを送受信するためのソケット
     #   - get_player_card: プレイヤーカードの種類を通知するか否か
     #   - get_dealer_cards: ディーラーの手札を通知するか否か
-    def receive_message(self, dsoc: socket.socket, get_player_card=False, get_dealer_cards=False):
+    #   - retry_mode: RETRY実行時か否か
+    def receive_message(self, dsoc: socket.socket, get_player_card=False, get_dealer_cards=False, retry_mode=False):
         msg = dsoc.recv(1024).decode("utf-8").split(',')
         if get_player_card:
             player_card = int(msg[0])
+            if retry_mode:
+                self.player_hand.pop()
             self.player_hand.append(player_card)
             msg = msg[1:]
         status = msg[1]
@@ -265,18 +291,20 @@ class Player:
 class QTable:
 
     # コンストラクタ
+    #   - action_class: 行動クラスの名称
     #   - default_value: まだ一度も試していない行動の初期Q値
-    def __init__(self, default_value=0):
+    def __init__(self, action_class, default_value=0):
+        self.ActionClass = action_class
         self.default_value = default_value
         self.table = {}
 
     # 状態 state の下で行動 action を実行する場合のQ値として value をセットする
-    def set_Q_value(self, state, action: Action, value):
+    def set_Q_value(self, state, action, value):
         key = (state, action)
         self.table[key] = value
 
     # 状態 state の下で行動 action を実行する場合のQ値
-    def get_Q_value(self, state, action: Action):
+    def get_Q_value(self, state, action):
         key = (state, action)
         if key in self.table.keys():
             return self.table[key]
@@ -288,8 +316,8 @@ class QTable:
     def get_best_action(self, state, with_value=False):
         best_actions = []
         best_value = 0
-        for a in Action:
-            if a == Action.UNDEFINED:
+        for a in self.ActionClass:
+            if a == self.ActionClass.UNDEFINED:
                 continue
             q = self.get_Q_value(state, a)
             if len(best_actions) == 0:

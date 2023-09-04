@@ -3,7 +3,7 @@ import socket
 import argparse
 import numpy as np
 from classes import Action, Player, get_card_info, get_action_name
-from config import PORT, BET, INITIAL_MONEY, N_DECKS, SHUFFLE_INTERVAL
+from config import PORT, BET, INITIAL_MONEY, N_DECKS
 
 
 ### グローバル変数 ###
@@ -34,6 +34,13 @@ def game_start(game_ID=0):
     print('Action: BET')
     print('  money: ', money, '$')
     print('  bet: ', bet, '$')
+
+    # ディーラーから「カードシャッフルを行ったか否か」の情報を取得
+    # シャッフルが行われた場合は True が, 行われなかった場合は False が，変数 cardset_shuffled にセットされる
+    # なお，本サンプルコードではここで取得した情報は使用していない
+    cardset_shuffled = player.receive_card_shuffle_status(soc)
+    if cardset_shuffled:
+        print('Dealer said: Card set has been shuffled before this game.')
 
     # ディーラーから初期カード情報を受信
     dc, pc1, pc2 = player.receive_init_cards(soc)
@@ -161,6 +168,42 @@ def surrender():
     print('  money: ', player.get_money(), '$')
     return reward, True, status
 
+# RETRYを実行する
+def retry():
+    global player, soc
+
+    print('Action: RETRY')
+
+    # ベット額の 1/4 を消費
+    penalty = player.current_bet // 4
+    player.consume_money(penalty)
+    print('  player-card {0} has been removed.'.format(player.get_num_player_cards()))
+    print('  money: ', player.get_money(), '$')
+
+    # ディーラーにメッセージを送信
+    player.send_message(soc, 'retry')
+
+    # ディーラーから情報を受信
+    pc, score, status, rate, dc = player.receive_message(dsoc=soc, get_player_card=True, get_dealer_cards=True, retry_mode=True)
+    print('  player-card {0}: '.format(player.get_num_player_cards()), get_card_info(pc))
+    print('  current score: ', score)
+
+    # バーストした場合はゲーム終了
+    if status == 'bust':
+        for i in range(len(dc)):
+            print('  dealer-card {0}: '.format(i+2), get_card_info(dc[i]))
+        print("  dealer's score: ", player.get_dealer_score())
+        soc.close() # ディーラーとの通信をカット
+        reward = player.update_money(rate=rate) # 所持金額を更新
+        print('Game finished.')
+        print('  result: bust')
+        print('  money: ', player.get_money(), '$')
+        return reward-penalty, True, status
+
+    # バーストしなかった場合は続行
+    else:
+        return -penalty, False, status
+
 # 行動の実行
 def act(action: Action):
     if action == Action.HIT:
@@ -171,6 +214,8 @@ def act(action: Action):
         return double_down()
     elif action == Action.SURRENDER:
         return surrender()
+    elif action == Action.RETRY:
+        return retry()
     else:
         exit()
 
@@ -196,8 +241,8 @@ def get_state():
 # 行動戦略（現状態 state によらずランダム選択）
 def select_action(state):
 
-    # 乱数を用いて 0 以上 4 未満の整数（0, 1, 2, 3のどれか）をランダムに取得
-    z = np.random.randint(0, 4)
+    # 乱数を用いて 0 以上 5 未満の整数（ 0, 1, 2, 3, 4 のどれか）をランダムに取得
+    z = np.random.randint(0, 5)
 
     # 取得した整数値に応じて行動
     if z == 0:
@@ -206,8 +251,10 @@ def select_action(state):
         return Action.STAND
     elif z == 2:
         return Action.DOUBLE_DOWN
-    else: # z == 3 のとき
+    elif z == 3:
         return Action.SURRENDER
+    else: # z == 4 のとき
+        return Action.RETRY
 
 
 ### ここから処理開始 ###
@@ -241,7 +288,7 @@ for n in range(1, n_games):
         # 選択した行動を実際に実行
         # 戻り値:
         #   - done: 終了フラグ．今回の行動によりゲームが終了したか否か（終了した場合はTrue, 続行中ならFalse）
-        #   - reward: 獲得金額（ゲーム続行中の場合は 0 ）
+        #   - reward: 獲得金額（ゲーム続行中の場合は 0 , ただし RETRY を実行した場合は1回につき -BET/4 ）
         #   - status: 行動実行後のプレイヤーステータス（バーストしたか否か，勝ちか負けか，などの状態を表す文字列）
         reward, done, status = act(action)
 

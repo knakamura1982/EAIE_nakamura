@@ -10,7 +10,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader, random_split
 from NN_structure import BJNet
 from mylib.data_io import CSVBasedDataset
-from mylib.option import print_args
+from mylib.utility import print_args
 
 
 # データセットファイル

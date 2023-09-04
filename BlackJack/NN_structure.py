@@ -3,6 +3,7 @@ import sys
 sys.path.append(os.path.abspath('..'))
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from mylib.basic_layers import *
 
 
@@ -19,7 +20,7 @@ class BJNet(nn.Module):
         self.layer2 = FC(in_features=10, out_features=10, do_bn=False, dropout_ratio=0.5, activation='tanh')
 
         # 3層目: 10パーセプトロン → 4クラス出力（バッチ正規化なし, ドロップアウトなし, 活性化関数なし）
-        self.layer3 = FC(in_features=10, out_features=4, do_bn=False, activation='none')
+        self.layer3 = FC(in_features=10, out_features=5, do_bn=False, activation='none')
 
     def forward(self, x):
         h = self.layer1(x) # 1層目にデータを入力

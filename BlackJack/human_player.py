@@ -68,18 +68,20 @@ class HumanPlayerWindow():
 
         # ボタン
         self.action_label = tk.Label(text="Action:", font=('Arial', '14', 'bold'))
-        self.action_label.place(x=40+120*max_cards_per_game, y=160)
+        self.action_label.place(x=40+120*max_cards_per_game, y=130)
         self.start_button = tk.Button(width=14, text='Game Start', font=('Arial', '12', 'bold'), command=self.game_start)
         self.ht_button = tk.Button(width=15, text='HIT', font=('Arial', '12'), state=tk.DISABLED, command=lambda:self.step(Action.HIT))
         self.st_button = tk.Button(width=15, text='STAND', font=('Arial', '12'), state=tk.DISABLED, command=lambda:self.step(Action.STAND))
         self.dd_button = tk.Button(width=15, text='DOUBLE DOWN', font=('Arial', '12'), state=tk.DISABLED, command=lambda:self.step(Action.DOUBLE_DOWN))
         self.sr_button = tk.Button(width=15, text='SURRENDER', font=('Arial', '12'), state=tk.DISABLED, command=lambda:self.step(Action.SURRENDER))
+        self.rd_button = tk.Button(width=15, text='RETRY', font=('Arial', '12'), state=tk.DISABLED, command=lambda:self.step(Action.RETRY))
         self.quit_button = tk.Button(width=14, text='Quit', font=('Arial', '12', 'bold'), command=self.game_quit)
         self.start_button.place(x=40+120*max_cards_per_game, y=50)
-        self.ht_button.place(x=40+120*max_cards_per_game, y=190)
-        self.st_button.place(x=40+120*max_cards_per_game, y=225)
-        self.dd_button.place(x=40+120*max_cards_per_game, y=260)
-        self.sr_button.place(x=40+120*max_cards_per_game, y=295)
+        self.ht_button.place(x=40+120*max_cards_per_game, y=160)
+        self.st_button.place(x=40+120*max_cards_per_game, y=195)
+        self.dd_button.place(x=40+120*max_cards_per_game, y=230)
+        self.sr_button.place(x=40+120*max_cards_per_game, y=265)
+        self.rd_button.place(x=40+120*max_cards_per_game, y=300)
         self.quit_button.place(x=40+120*max_cards_per_game, y=400)
 
     # 実行
@@ -120,6 +122,7 @@ class HumanPlayerWindow():
         self.st_button['state'] = tk.NORMAL
         self.dd_button['state'] = tk.NORMAL
         self.sr_button['state'] = tk.NORMAL
+        self.rd_button['state'] = tk.NORMAL
         self.start_button['state'] = tk.DISABLED
         self.quit_button['state'] = tk.DISABLED
 
@@ -129,6 +132,7 @@ class HumanPlayerWindow():
         self.st_button['state'] = tk.DISABLED
         self.dd_button['state'] = tk.DISABLED
         self.sr_button['state'] = tk.DISABLED
+        self.rd_button['state'] = tk.DISABLED
         self.start_button['state'] = tk.NORMAL
         self.quit_button['state'] = tk.NORMAL
 
@@ -146,6 +150,11 @@ class HumanPlayerWindow():
         # ベット
         bet, money = self.player.set_bet()
         self.money_text.set("money: {0:5}$  ( bet: {1:3}$ )".format(money, bet)) # 金額表示を更新
+
+        # ディーラーから「カードシャッフルを行ったか否か」の情報を取得
+        # シャッフルが行われた場合は True が, 行われなかった場合は False が，変数 cardset_shuffled にセットされる
+        # なお，本サンプルコードではここで取得した情報は使用していない
+        cardset_shuffled = self.player.receive_card_shuffle_status(self.soc)
 
         # ディーラーから初期カード情報を受信
         dc, pc1, pc2 = self.player.receive_init_cards(self.soc)
@@ -328,6 +337,56 @@ class HumanPlayerWindow():
 
         return reward, True, status
 
+    # RETRY を実行する
+    def retry(self):
+
+        # ベット額の 1/4 を消費
+        penalty = self.player.current_bet // 4
+        self.player.consume_money(penalty)
+        self.money_text.set("money: {0:5}$  ( bet: {1:3}$ )".format(self.player.get_money(), self.player.get_current_bet()))
+
+        # ディーラーにメッセージを送信
+        self.player.send_message(self.soc, 'retry')
+
+        # ディーラーから情報を受信
+        pc, score, status, rate, dc = self.player.receive_message(dsoc=self.soc, get_player_card=True, get_dealer_cards=True, retry_mode=True)
+        n = self.player.get_num_player_cards()
+        self.draw_player_card(n-1, pc)
+        self.player_score_text.set("(score: {0})".format(score))
+
+        # バーストした場合はゲーム終了
+        if status == 'bust':
+
+            for i in range(len(dc)):
+                self.draw_dealer_card(i+1, dc[i])
+            self.dealer_score_text.set("(score: {0})".format(self.player.get_dealer_score()))
+
+            # ディーラーとの通信をカット
+            self.soc.close()
+
+            # 行動ボタンを無効化
+            self.deactivate_buttons()
+
+            # 所持金額を更新
+            reward = self.player.update_money(rate=rate)
+            self.money_text.set("money: {0:5}$  ( bet: {1:3}$ )".format(self.player.get_money(), self.player.get_current_bet()))
+
+            # 勝敗表示を更新
+            self.result_text.set("Bust...")
+            self.result_label['fg'] = 'blue'
+
+            return reward-penalty, True, status
+
+        # バーストしなかった場合は続行
+        else:
+
+            # 1ゲームで引けるカードの最大枚数に達してしまった場合，HITとDOUBLE DOWNを選択できないようにする
+            if n >= self.max_cards_per_game:
+                self.ht_button['state'] = tk.DISABLED
+                self.dd_button['state'] = tk.DISABLED
+
+            return -penalty, False, status
+
     # 行動の実行
     def act(self, action: Action):
         if action == Action.HIT:
@@ -338,6 +397,8 @@ class HumanPlayerWindow():
             return self.double_down()
         elif action == Action.SURRENDER:
             return self.surrender()
+        elif action == Action.RETRY:
+            return self.retry()
         else:
             exit()
 
