@@ -6,25 +6,22 @@ from enum import Enum
 
 
 # ゲームの名称
-GAME_NAME = 'Acrobot-v1'
+GAME_NAME = 'CartPole-v1'
 
 # 行動の種類
 class Action(Enum):
-    APPLY_N1_TORQUE = 0 # 関節に -1 のトルクを加える
-    APPLY_0_TORQUE = 1 # 関節に 0 のトルクを加える
-    APPLY_P1_TORQUE = 2 # 関節に +1 のトルクを加える
-    UNDEFINED = 3 # 未定義状態. 念のため設定しておく
-ACTION_ID = { Action.APPLY_N1_TORQUE:0, Action.APPLY_0_TORQUE:1, Action.APPLY_P1_TORQUE:2 } # 行動名から行動番号への変換表
+    GO_LEFT = 0 # 台車を「左」へ動かす
+    GO_RIGHT = 1 # 台車を「右」へ動かす
+    UNDEFINED = 2 # 未定義状態. 念のため設定しておく
+ACTION_ID = { Action.GO_LEFT:0, Action.GO_RIGHT:1 } # 行動名から行動番号への変換表
 N_ACTIONS = len(ACTION_ID) # 種類数
 
 # 行動名の取得
 def get_action_name(action: Action):
-    if action == Action.APPLY_N1_TORQUE:
-        return 'APPLY_N1_TORQUE'
-    elif action == Action.APPLY_0_TORQUE:
-        return 'APPLY_0_TORQUE'
-    elif action == Action.APPLY_P1_TORQUE:
-        return 'APPLY_P1_TORQUE'
+    if action == Action.GO_LEFT:
+        return 'GO_LEFT'
+    elif action == Action.GO_RIGHT:
+        return 'GO_RIGHT'
     else:
         return 'UNDEFINED'
 
@@ -39,11 +36,25 @@ q_table = QTable(action_class=Action)
 
 ### 状態の定義 ###
 
+'''
+CartPole-v0の観測量は, 以下の4つを要素とする4次元ベクトルと定義されている.
+  - 1次元目: 台車の位置（-4.8 ~ 4.8）
+  - 2次元目: 台車の速度（-inf ~ inf）
+  - 3次元目: 棒の角度（-0.418 ~ 0.418）
+  - 4次元目: 棒の先端の速度（-inf ～ inf）
+
+Q学習を実行するためには, 上記の4次元ベクトルを適当に離散化し, 有限種類の「状態」に落とし込む必要がある.
+'''
 def get_state(observation):
 
-    # 常に「状態0」
-    # これでは当然まともに学習されないので，適切に定義し直す必要がある
-    return 0
+    # 観測量の離散化
+    cart_pos = np.digitize(observation[0], bins=[-4.8, -2.4, 0, 2.4, 4.8]) # 1次元目
+    cart_vel = np.digitize(observation[1], bins=[-3.0, -1.5, 0, 1.5, 3.0]) # 2次元目
+    pole_ang = np.digitize(observation[2], bins=[-0.4, -0.2, 0, 0.2, 0.4]) # 3次元目
+    pole_vel = np.digitize(observation[3], bins=[-2.0, -1.0, 0, 1.0, 2.0]) # 4次元目
+
+    # 離散化した観測値を tuple にして返却
+    return (cart_pos, cart_vel, pole_ang, pole_vel)
 
 
 ### 関数 ###
@@ -65,14 +76,14 @@ def select_action(state, strategy: Strategy):
 
     # ランダム戦略
     else:
-        return np.random.choice([Action.APPLY_N1_TORQUE, Action.APPLY_0_TORQUE, Action.APPLY_P1_TORQUE])
+        return np.random.choice([Action.GO_LEFT, Action.GO_RIGHT])
 
 
 ### ここから処理開始 ###
 
 def main():
 
-    parser = argparse.ArgumentParser(description='OpenAI Gym Acrobot-v1')
+    parser = argparse.ArgumentParser(description='OpenAI Gym CartPole-v0')
     parser.add_argument('--games', type=int, default=1, help='num. of games to play')
     parser.add_argument('--max_steps', type=int, default=200, help='max num. of steps per game')
     parser.add_argument('--load', type=str, default='', help='filename of Q table to be loaded before learning')
