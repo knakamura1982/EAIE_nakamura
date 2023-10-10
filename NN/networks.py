@@ -44,7 +44,7 @@ class SampleMLP(nn.Module):
         h = self.fc2(h)   # 続いて全結合層2に通す
         h = self.drop2(h) # 続いてドロップアウト2に通す
         h = self.act2(h)  # 続いて活性化関数2に通す
-        y = self.fc3(h)   # 最後に全結合層3に通す
+        y = self.fc3(h)   # 最後に全結合層4に通す
         return y
 
 
