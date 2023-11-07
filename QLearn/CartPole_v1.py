@@ -30,8 +30,9 @@ EPS = 0.1 # ε-greedyにおけるε
 LEARNING_RATE = 0.1 # 学習率
 DISCOUNT_FACTOR = 0.9 # 割引率
 
-# Q学習用のQテーブル用
-q_table = QTable(action_class=Action)
+# Q学習用のQテーブル
+#   - default_value: Qテーブルの初期値（全てのマスがこの値で初期化される）
+q_table = QTable(action_class=Action, default_value=0)
 
 
 ### 状態の定義 ###
@@ -100,6 +101,7 @@ def main():
 
     # ゲーム環境を作成
     env = gym.make(GAME_NAME, render_mode='human')
+    #env = gym.make(GAME_NAME) # このように render_mode='human' の指定を外すとゲーム画面が描画されなくなり高速に動作する
 
     # Qテーブルをロード
     if args.load != '':
