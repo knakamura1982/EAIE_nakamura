@@ -14,7 +14,7 @@ N_DECKS = 2
 SHUFFLE_INTERVAL = 20
 
 # カードの残数が何枚を下回った時点で強制的にカードシャッフルを行うか
-SHUFFLE_THRESHOLD = 20
+SHUFFLE_THRESHOLD = 30 # RETRYが最大回数まで実行された場合に備え，30回とする
 
 # 1ゲームで引けるカードの最大枚数
 MAX_CARDS_PER_GAME = 6

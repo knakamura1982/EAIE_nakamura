@@ -6,7 +6,14 @@ from classes import Action, Strategy, QTable, Player, get_card_info, get_action_
 from config import PORT, BET, INITIAL_MONEY, N_DECKS
 
 
+# 1ゲームあたりのRETRY回数の上限
+RETRY_MAX = 10
+
+
 ### グローバル変数 ###
+
+# ゲームごとのRETRY回数のカウンター
+g_retry_counter = 0
 
 # プレイヤークラスのインスタンスを作成
 player = Player(initial_money=INITIAL_MONEY, basic_bet=BET)
@@ -15,7 +22,7 @@ player = Player(initial_money=INITIAL_MONEY, basic_bet=BET)
 soc = None
 
 # Q学習用のQテーブル
-q_table = QTable(action_class=Action)
+q_table = QTable(action_class=Action, default_value=0)
 
 # Q学習の設定値
 EPS = 0.3 # ε-greedyにおけるε
@@ -27,10 +34,13 @@ DISCOUNT_FACTOR = 0.9 # 割引率
 
 # ゲームを開始する
 def game_start(game_ID=0):
-    global player, soc
+    global g_retry_counter, player, soc
 
     print('Game {0} start.'.format(game_ID))
     print('  money: ', player.get_money(), '$')
+
+    # RETRY回数カウンターの初期化
+    g_retry_counter = 0
 
     # ディーラープログラムに接続する
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -312,6 +322,11 @@ for n in range(1, n_games):
             action = select_action(state, Strategy.QMAX)
         else:
             action = select_action(state, Strategy.E_GREEDY)
+        if g_retry_counter >= RETRY_MAX and action == Action.RETRY:
+            # RETRY回数が上限に達しているにもかかわらずRETRYが選択された場合，他の行動をランダムに選択
+            action = np.random.choice([
+                Action.HIT, Action.STAND, Action.DOUBLE_DOWN, Action.SURRENDER
+            ])
         action_name = get_action_name(action) # 行動名を表す文字列を取得
 
         # 選択した行動を実際に実行
@@ -320,6 +335,10 @@ for n in range(1, n_games):
         #   - reward: 獲得金額（ゲーム続行中の場合は 0 , ただし RETRY を実行した場合は1回につき -BET/4 ）
         #   - status: 行動実行後のプレイヤーステータス（バーストしたか否か，勝ちか負けか，などの状態を表す文字列）
         reward, done, status = act(action)
+
+        # 実行した行動がRETRYだった場合はRETRY回数カウンターを1増やす
+        if action == Action.RETRY:
+            g_retry_counter += 1
 
         # 「現在の状態」を再取得
         prev_state = state # 行動前の状態を別変数に退避
