@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from networks import CardClassifier2, CardChecker
+from networks import CardClassifierAlt, CardChecker
 from mylib.visualizers import LossVisualizer
 from mylib.data_io import CSVBasedDataset
 from mylib.utility import print_args
@@ -30,8 +30,8 @@ NCC_MODEL_PATH = os.path.join(MODEL_DIR, 'ncc_model.pth')
 
 # 画像のサイズ・チャンネル数
 C = 3 # チャンネル数
-H = 96 # 縦幅
-W = 64 # 横幅
+H = 144 # 縦幅
+W = 96  # 横幅
 
 
 # デバイス, エポック数, バッチサイズなどをコマンドライン引数から取得し変数に保存
@@ -97,8 +97,8 @@ valid_dataloader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=Fals
 
 # ニューラルネットワークの作成
 cc_model = CardChecker(C=C, H=H, W=W).to(DEVICE) # カードが絵札か否かを判定するモデル
-pcc_model = CardClassifier2(C=C, H=H, W=W, C1=4, N_SUITS=4, N_NUMBERS=3).to(DEVICE) # 絵札カードのスートと数字を判定するモデル
-ncc_model = CardClassifier2(C=C, H=H, W=W, C1=4, N_SUITS=4, N_NUMBERS=10).to(DEVICE) # 非絵札カードのスートと数字を判定するモデル
+pcc_model = CardClassifierAlt(C=C, H=H, W=W, N_SUITS=4, N_NUMBERS=3).to(DEVICE) # 絵札カードのスートと数字を判定するモデル
+ncc_model = CardClassifierAlt(C=C, H=H, W=W, N_SUITS=4, N_NUMBERS=10).to(DEVICE) # 非絵札カードのスートと数字を判定するモデル
 
 # 最適化アルゴリズムの指定（ここでは Adam を使用）
 cc_optimizer = optim.Adam(cc_model.parameters())
@@ -136,10 +136,10 @@ for epoch in range(N_EPOCHS):
         Y2_pred = cc_model(X) # ミニバッチ内の各カードが絵札か否かを判定
         Y1_pred_p, Y3_pred = pcc_model(X[p_idx]) # 絵札カードのスートと数字を認識
         Y1_pred_n, Y4_pred = ncc_model(X[n_idx]) # 非絵札カードのスートと数字を認識
-
-        # 損失関数の現在値を計算
-        loss = loss_func(Y2_pred, Y2) + loss_func(Y1_pred_p, Y1[p_idx]) + loss_func(Y3_pred, Y3[p_idx]) + loss_func(Y1_pred_n, Y1[n_idx]) + loss_func(Y4_pred, Y4[n_idx])
-
+        y2_loss = loss_func(Y2_pred, Y2)
+        y3_loss = loss_func(Y1_pred_p, Y1[p_idx]) + loss_func(Y3_pred, Y3[p_idx])
+        y4_loss = loss_func(Y1_pred_n, Y1[n_idx]) + loss_func(Y4_pred, Y4[n_idx])
+        loss = y2_loss + y3_loss + y4_loss# 損失関数の現在値を計算
         loss.backward() # 誤差逆伝播法により，個々のパラメータに関する損失関数の勾配（偏微分）を計算
         cc_optimizer.step() # 勾配に沿ってパラメータの値を更新
         pcc_optimizer.step() # 同上
@@ -167,13 +167,12 @@ for epoch in range(N_EPOCHS):
             n_idx = torch.where(Y2 == 0)[0] # ミニバッチ内の画像で実際に絵札でないもののインデックスを抽出
             Y1_pred_p, Y3_pred = pcc_model(X[p_idx]) # 絵札カードのスートと数字を認識
             Y1_pred_n, Y4_pred = ncc_model(X[n_idx]) # 非絵札カードのスートと数字を認識
-
-            # 損失関数の現在値を計算
-            loss = loss_func(Y2_pred, Y2) + loss_func(Y1_pred_p, Y1[p_idx]) + loss_func(Y3_pred, Y3[p_idx]) + loss_func(Y1_pred_n, Y1[n_idx]) + loss_func(Y4_pred, Y4[n_idx])
+            y2_loss = loss_func(Y2_pred, Y2)
+            y3_loss = loss_func(Y1_pred_p, Y1[p_idx]) + loss_func(Y3_pred, Y3[p_idx])
+            y4_loss = loss_func(Y1_pred_n, Y1[n_idx]) + loss_func(Y4_pred, Y4[n_idx])
+            loss = y2_loss + y3_loss + y4_loss# 損失関数の現在値を計算
             sum_loss += float(loss) * len(X)
-
-            # 推定値と正解値が一致していないデータの個数を数える
-            n_failed += torch.count_nonzero(
+            n_failed += torch.count_nonzero( # 推定値と正解値が一致していないデータの個数を数える
                 torch.abs(torch.argmax(Y2_pred[p_idx], dim=1) - Y2[p_idx])
                 + torch.abs(torch.argmax(Y1_pred_p, dim=1) - Y1[p_idx])
                 + torch.abs(torch.argmax(Y3_pred, dim=1) - Y3[p_idx])

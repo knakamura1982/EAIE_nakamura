@@ -13,16 +13,15 @@ class CardClassifier(nn.Module):
     # C: 入力画像のチャンネル数（グレースケール画像なら1，カラー画像なら3）
     # H: 入力画像の縦幅（8の倍数を想定）
     # W: 入力画像の横幅（8の倍数を想定）
-    # C1: 1層目のチャンネル数
     # N_CLASS: カードの種類数
-    def __init__(self, C, H, W, C1=8, N_CLASS=52):
+    def __init__(self, C, H, W, N_CLASS=52):
         super(CardClassifier, self).__init__()
 
         # 層ごとのチャンネル数
-        L1_C = C1   # 1層目
-        L2_C = 2*C1 # 2層目
-        L3_C = 4*C1 # 3層目
-        L4_N = 4*C1 # 4層目（4層目は畳み込み層ではなく全結合層であり，L4_Nはそのユニット数を表す）
+        L1_C = 4  # 1層目
+        L2_C = 8  # 2層目
+        L3_C = 16 # 3層目
+        L4_N = 32 # 4層目（4層目は畳み込み層ではなく全結合層であり，L4_Nはそのユニット数を表す）
 
         ### 1～3層目: スート認識と数字認識で共通
 
@@ -78,22 +77,21 @@ class CardClassifier(nn.Module):
 
 
 # カードの数字とスートを個別に認識するCNN
-class CardClassifier2(nn.Module):
+class CardClassifierAlt(nn.Module):
 
     # C: 入力画像のチャンネル数（グレースケール画像なら1，カラー画像なら3）
     # H: 入力画像の縦幅（8の倍数を想定）
     # W: 入力画像の横幅（8の倍数を想定）
-    # C1: 1層目のチャンネル数
     # N_SUITS: 認識対象のスートの種類数
     # N_NUMBERS: 認識対象の数字の種類数
-    def __init__(self, C, H, W, C1=8, N_SUITS=4, N_NUMBERS=13):
-        super(CardClassifier2, self).__init__()
+    def __init__(self, C, H, W, N_SUITS=4, N_NUMBERS=13):
+        super(CardClassifierAlt, self).__init__()
 
         # 層ごとのチャンネル数
-        L1_C = C1   # 1層目
-        L2_C = 2*C1 # 2層目
-        L3_C = 4*C1 # 3層目
-        L4_N = 4*C1 # 4層目（4層目は畳み込み層ではなく全結合層であり，L4_Nはそのユニット数を表す）
+        L1_C = 4  # 1層目
+        L2_C = 8  # 2層目
+        L3_C = 16 # 3層目
+        L4_N = 16 # 4層目（4層目は畳み込み層ではなく全結合層であり，L4_Nはそのユニット数を表す）
 
         ### 1～3層目: スート認識と数字認識で共通
 
@@ -174,15 +172,14 @@ class CardChecker(nn.Module):
     # C: 入力画像のチャンネル数（グレースケール画像なら1，カラー画像なら3）
     # H: 入力画像の縦幅（8の倍数を想定）
     # W: 入力画像の横幅（8の倍数を想定）
-    # C1: 1層目のチャンネル数
-    def __init__(self, C, H, W, C1=4):
+    def __init__(self, C, H, W):
         super(CardChecker, self).__init__()
 
         # 層ごとのチャンネル数
-        L1_C = C1   # 1層目
-        L2_C = 2*C1 # 2層目
-        L3_C = 4*C1 # 3層目
-        L4_N = 4*C1 # 4層目（4層目は畳み込み層ではなく全結合層であり，L4_Nはそのユニット数を表す）
+        L1_C = 4 # 1層目
+        L2_C = 4 # 2層目
+        L3_C = 8 # 3層目
+        L4_N = 8 # 4層目（4層目は畳み込み層ではなく全結合層であり，L4_Nはそのユニット数を表す）
 
         # 1層目: 畳込み, Cチャンネル入力 → L1_Cチャンネル，カーネルサイズ5x5, ストライド幅とゼロパディングは特徴マップの縦横幅が変わらないように設定
         self.layer1 = nn.Sequential(

@@ -8,7 +8,7 @@ import argparse
 import torch
 import numpy as np
 from square_detecters import SquareDetector
-from networks import CardClassifier2, CardChecker
+from networks import CardClassifierAlt, CardChecker
 from mylib.utility import print_args
 
 
@@ -20,8 +20,8 @@ NCC_MODEL_PATH = os.path.join(MODEL_DIR, 'ncc_model.pth')
 
 # カード画像のサイズ・チャンネル数
 C = 3 # チャンネル数
-H = 96 # 縦幅
-W = 64 # 横幅
+H = 144 # 縦幅
+W = 96  # 横幅
 
 # カード画像のサイズ(Height, Width)
 CARD_IMAGE_SIZE = (H, W)
@@ -107,8 +107,8 @@ with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'rb') as fdicts_file:
 
 # ニューラルネットワークの作成
 cc_model = CardChecker(C=C, H=H, W=W) # カードが絵札か否かを判定するモデル
-pcc_model = CardClassifier2(C=C, H=H, W=W, C1=4, N_SUITS=4, N_NUMBERS=3) # 絵札カードのスートと数字を判定するモデル
-ncc_model = CardClassifier2(C=C, H=H, W=W, C1=4, N_SUITS=4, N_NUMBERS=10) # 非絵札カードのスートと数字を判定するモデル
+pcc_model = CardClassifierAlt(C=C, H=H, W=W, N_SUITS=4, N_NUMBERS=3) # 絵札カードのスートと数字を判定するモデル
+ncc_model = CardClassifierAlt(C=C, H=H, W=W, N_SUITS=4, N_NUMBERS=10) # 非絵札カードのスートと数字を判定するモデル
 cc_model.load_state_dict(torch.load(CC_MODEL_PATH))
 pcc_model.load_state_dict(torch.load(PCC_MODEL_PATH))
 ncc_model.load_state_dict(torch.load(NCC_MODEL_PATH))
