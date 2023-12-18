@@ -66,7 +66,7 @@ train_dataset = CSVBasedDataset(
     dirname = DATA_DIR,
 )
 train_size = len(train_dataset)
-with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'wb') as fdicts_file:
+with open(os.path.join(MODEL_DIR, 'fdicts2.pkl'), 'wb') as fdicts_file:
     pickle.dump(train_dataset.forward_dicts, fdicts_file)
 
 # 同じく，検証用データセットを用意

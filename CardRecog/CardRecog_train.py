@@ -28,8 +28,8 @@ MODEL_PATH = os.path.join(MODEL_DIR, 'model.pth')
 
 # 画像のサイズ・チャンネル数
 C = 3 # チャンネル数
-H = 96 # 縦幅
-W = 64 # 横幅
+H = 144 # 縦幅
+W = 96  # 横幅
 
 
 # デバイス, エポック数, バッチサイズなどをコマンドライン引数から取得し変数に保存
@@ -82,7 +82,7 @@ train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True
 valid_dataloader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False, pin_memory=True)
 
 # ニューラルネットワークの作成
-model = CardClassifier(C=C, H=H, W=W, C1=8, N_CLASS=52).to(DEVICE) # カードの種類を判定するモデル
+model = CardClassifier(C=C, H=H, W=W, N_CLASS=52).to(DEVICE) # カードの種類を判定するモデル
 
 # 最適化アルゴリズムの指定（ここでは Adam を使用）
 optimizer = optim.Adam(model.parameters())
@@ -124,9 +124,9 @@ for epoch in range(N_EPOCHS):
             Y_pred = model(X) # ミニバッチ内の各カードの種類を判定
             loss = loss_func(Y_pred, Y) # 損失関数の現在値を計算
             sum_loss += float(loss) * len(X)
-
-            # 推定値と正解値が一致していないデータの個数を数える
-            n_failed += torch.count_nonzero(torch.argmax(Y_pred, dim=1) - Y)
+            n_failed += torch.count_nonzero( # 推定値と正解値が一致していないデータの個数を数える
+                torch.argmax(Y_pred, dim=1) - Y
+            )
     avg_loss = sum_loss / valid_size
     accuracy = (valid_size - n_failed) / valid_size
     loss_viz.add_value('valid loss', avg_loss)

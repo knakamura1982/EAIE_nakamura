@@ -18,8 +18,8 @@ MODEL_PATH = os.path.join(MODEL_DIR, 'model.pth')
 
 # カード画像のサイズ・チャンネル数
 C = 3 # チャンネル数
-H = 96 # 縦幅
-W = 64 # 横幅
+H = 144 # 縦幅
+W = 96  # 横幅
 
 # カード画像のサイズ(Height, Width)
 CARD_IMAGE_SIZE = (H, W)
@@ -100,7 +100,7 @@ with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'rb') as fdicts_file:
     rdict = {v:k for k, v in fdict.items()}
 
 # ニューラルネットワークの作成
-model = CardClassifier(C=C, H=H, W=W, C1=8, N_CLASS=52) # カードの種類を判定するモデル
+model = CardClassifier(C=C, H=H, W=W, N_CLASS=52) # カードの種類を判定するモデル
 model.load_state_dict(torch.load(MODEL_PATH))
 model = model.to(DEVICE)
 model.eval()

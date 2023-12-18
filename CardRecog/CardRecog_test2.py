@@ -96,7 +96,7 @@ args = print_args(parser.parse_args())
 DEVICE = args['device']
 
 # 認識対象クラスの名称と番号の対応表を取得
-with open(os.path.join(MODEL_DIR, 'fdicts.pkl'), 'rb') as fdicts_file:
+with open(os.path.join(MODEL_DIR, 'fdicts2.pkl'), 'rb') as fdicts_file:
     fdicts = pickle.load(fdicts_file)
     fdict1 = fdicts[1]
     fdict3 = fdicts[3]
