@@ -28,6 +28,8 @@ def __select_activation__(activation):
         act = F.prelu
     elif activation == 'r' or activation == 'relu':
         act = F.relu
+    elif activation == 'w' or activation == 'silu' or activation == 'swish':
+        act = F.silu
     elif activation == 's' or activation == 'sigmoid':
         act = torch.sigmoid
     elif activation == 't' or activation == 'tanh':
@@ -53,6 +55,8 @@ def __wrap_layer__(layer:nn.Module, normalization:str='none', activation:str='no
         act = nn.PReLU()
     elif activation == 'r' or activation == 'relu':
         act = nn.ReLU()
+    elif activation == 'w' or activation == 'silu' or activation == 'swish':
+        act = nn.SiLU()
     elif activation == 's' or activation == 'sigmoid':
         act = nn.Sigmoid()
     elif activation == 't' or activation == 'tanh':
@@ -197,10 +201,10 @@ class Pool(nn.Module):
 
     def __init__(self, method='avg', scale=2):
         super(Pool, self).__init__()
-        if method == 'avg':
-            self.pool = nn.AvgPool2d(kernel_size=scale, stride=scale)
-        elif method == 'max':
+        if method == 'max':
             self.pool = nn.MaxPool2d(kernel_size=scale, stride=scale)
+        else:
+            self.pool = nn.AvgPool2d(kernel_size=scale, stride=scale)
 
     def __call__(self, x):
         return self.pool(x)
@@ -208,19 +212,18 @@ class Pool(nn.Module):
 
 # Global Pooling を行う層
 #   - method: プーリング手法（'max'または'avg'のいずれか, デフォルトでは global average pooling ）
+#   - output_size: 出力マップのサイズ（縦幅，横幅）
 class GlobalPool(nn.Module):
 
-    def __init__(self, method='avg'):
+    def __init__(self, method='avg', output_size=1):
         super(GlobalPool, self).__init__()
-        self.method = method
+        if method == 'max':
+            self.pool = nn.AdaptiveMaxPool2d(output_size)
+        else:
+            self.pool = nn.AdaptiveAvgPool2d(output_size)
 
     def __call__(self, x):
-        if self.method == 'avg':
-            h = torch.mean(x, dim=(2, 3))
-        elif self.method == 'max':
-            h = torch.max(x, dim=3)[0]
-            h = torch.max(h, dim=2)[0]
-        return h
+        return self.pool(x)
 
 
 # 畳込み + 正規化 + 活性化関数 + Pixel Shuffle を行う層
@@ -346,17 +349,17 @@ class AdaIN(nn.Module):
 # 転移学習で VGG や ResNet を使用する際の前処理を行う層
 class BackbonePreprocess(nn.Module):
 
-    def __init__(self, do_center_crop=True):
+    def __init__(self, image_size=224, image_size_before_cropped=256, do_center_crop=True):
         super(BackbonePreprocess, self).__init__()
         if do_center_crop:
             self.preprocess = transforms.Compose([
-                transforms.Resize(256), # 入力画像を 256x256 ピクセルに正規化
-                transforms.CenterCrop(224), # 256x256 ピクセルの入力画像から中央 224x224 ピクセルを取り出す
+                transforms.Resize(image_size_before_cropped, antialias=True), # 入力画像を 256x256 ピクセルに正規化
+                transforms.CenterCrop(image_size), # 256x256 ピクセルの入力画像から中央 224x224 ピクセルを取り出す
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # 取り出した部分の画素値を正規化する
             ])
         else:
             self.preprocess = transforms.Compose([
-                transforms.Resize(224), # 入力画像を 224x224 ピクセルに正規化
+                transforms.Resize(image_size, antialias=True), # 入力画像を 224x224 ピクセルに正規化
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # 取り出した部分の画素値を正規化する
             ])
 
@@ -402,6 +405,14 @@ class Backbone(nn.Module):
         x = torch.randn(1, 3, 224, 224).to(device)
         y = self.__call__(x)
         print(y.size()[1:])
+
+    def get_output_size(self):
+        for param in self.parameters():
+            device = param.data.device
+            break
+        x = torch.randn(1, 3, 224, 224).to(device)
+        y = self.__call__(x)
+        return y.size()[1:]
 
 
 # Plain 型 Residual Block 層
@@ -609,3 +620,44 @@ class DiscriminatorAugmentation(nn.Module):
             return ret[0]
         else:
             return tuple(ret)
+
+
+# コサイン類似度による認識を実現するためのレイヤ
+# 下記サイトの MarginCosineProduct クラスを流用
+# https://github.com/MuggleWang/CosFace_pytorch
+class CosineSimScore(nn.Module):
+
+    # コサイン類似度の計算
+    @staticmethod
+    def cosine_sim(x1, x2, dim=1, eps=1e-8):
+        ip = torch.mm(x1, x2.t()) # x1 と x2 の内積
+        w1 = torch.norm(x1, 2, dim) # x1 の二乗ノルム
+        w2 = torch.norm(x2, 2, dim) # x2 の二乗ノルム
+        return ip / torch.outer(w1, w2).clamp(min=eps)
+
+    # コンストラクタ
+    #   - in_features: 入力側のユニット数（特徴量の次元数）
+    #   - out_features: 出力側のユニット数（認識対象のクラスの数）
+    #   - margin: 正解クラスのコサイン類似度に付加するマージン幅
+    #   - scale: コサイン類似度の増幅率
+    def __init__(self, in_features, out_features, margin=0.35, scale=30.0):
+        super(CosineSimScore, self).__init__()
+        self.out_features = out_features
+        self.in_features = in_features
+        self.s = scale
+        self.m = margin
+        self.weight = nn.Parameter(torch.Tensor(out_features, in_features))
+        nn.init.xavier_uniform_(self.weight)
+
+    # 順伝播（このレイヤを使用する場合，学習時に正解ラベル情報を与える必要がある．テスト時は不要）
+    #   - x: 入力画像（ミニバッチ）
+    #   - t: 正解ラベル（ミニバッチ，学習時のみ必要）
+    def forward(self, x, t=None):
+        cosine = self.cosine_sim(x, self.weight)
+        if t is None:
+            return self.s * cosine
+        else:
+            # 正解ラベルを整数値で与える場合は one-hot 表現に変換
+            one_hot = torch.zeros_like(cosine)
+            one_hot.scatter_(1, t.view(-1, 1), 1.0)
+            return self.s * (cosine - one_hot * self.m)

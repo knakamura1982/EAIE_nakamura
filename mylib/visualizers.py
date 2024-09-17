@@ -125,7 +125,9 @@ class LossVisualizer():
     # コンストラクタ
     #   - items: 可視化する損失の名称を列挙したリスト
     #   - log_mode: 縦軸を対数スケールにするか否か
-    def __init__(self, items, log_mode=False):
+    #   - init_epoch: 初期エポック番号
+    def __init__(self, items, log_mode=False, init_epoch=0):
+        self.init_epoch = init_epoch + 1
         self.log_mode = log_mode
         self.loss_values = {}
         for item in items:
@@ -150,7 +152,7 @@ class LossVisualizer():
         plt.ylabel('loss value')
         plt.grid()
         for item in self.loss_values.keys():
-            t = np.arange(1, len(self.loss_values[item]) + 1)
+            t = np.arange(self.init_epoch, len(self.loss_values[item]) + self.init_epoch)
             plt.plot(t, self.loss_values[item], label=item)
         plt.legend()
         plt.pause(sec)
@@ -167,11 +169,11 @@ class LossVisualizer():
         plt.ylabel('loss value')
         plt.grid()
         for item in self.loss_values.keys():
-            t = np.arange(1, len(self.loss_values[item]) + 1)
+            t = np.arange(self.init_epoch, len(self.loss_values[item]) + self.init_epoch)
             plt.plot(t, self.loss_values[item], label=item)
         plt.legend()
         plt.savefig(v_file)
         df = pd.DataFrame(self.loss_values, columns=self.loss_values.keys())
         df.reset_index(drop=True, inplace=True)
-        df.index = np.arange(1, len(df)+1)
+        df.index = np.arange(self.init_epoch, len(df) + self.init_epoch)
         df.to_csv(h_file)
